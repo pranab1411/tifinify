@@ -1,0 +1,331 @@
+{% extends "base.html" %}
+
+{% block title %}Discover Tiffin & Mess Services | Tifinify{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-lg-5 py-4">
+  <div class="row g-4">
+    <!-- Left Filter Sidebar -->
+    <div class="col-lg-3">
+      <div class="card border-0 shadow-sm rounded-4 p-3 bg-white sticky-top" style="top: 80px;">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <h5 class="fw-bold mb-0 text-dark"><i class="bi bi-sliders me-2 text-success"></i> Filters</h5>
+          <a href="{{ url_for('provider.discovery') }}" class="text-decoration-none small text-muted">Reset</a>
+        </div>
+
+        <form action="{{ url_for('provider.discovery') }}" method="GET" id="filterForm">
+          <!-- Locality & Coordinates -->
+          <div class="mb-3">
+            <label class="form-label small fw-bold text-muted">Location / Area</label>
+            <div class="input-group input-group-sm">
+              <input type="text" name="location" id="filterLocation" class="form-control" value="{{ location_query }}" placeholder="Area or locality" oninput="if (!this.value.toLowerCase().includes('current') && !this.value.toLowerCase().includes('gps')) { document.getElementById('hiddenLat').value=''; document.getElementById('hiddenLng').value=''; }">
+              <button type="button" class="btn btn-outline-secondary btn-use-location" title="Current Location">
+                <i class="bi bi-crosshair"></i>
+              </button>
+            </div>
+            <input type="hidden" name="lat" id="hiddenLat" value="{{ user_lat }}">
+            <input type="hidden" name="lng" id="hiddenLng" value="{{ user_lon }}">
+          </div>
+
+          <!-- Radius -->
+          <div class="mb-3">
+            <label class="form-label small fw-bold text-muted">Search Radius</label>
+            <select name="radius" class="form-select form-select-sm" onchange="this.form.submit()">
+              <option value="1" {% if radius == 1 %}selected{% endif %}>Within 1 km</option>
+              <option value="3" {% if radius == 3 %}selected{% endif %}>Within 3 km</option>
+              <option value="5" {% if radius == 5 %}selected{% endif %}>Within 5 km</option>
+              <option value="10" {% if radius == 10 %}selected{% endif %}>Within 10 km</option>
+            </select>
+          </div>
+
+          <!-- Category -->
+          <div class="mb-3">
+            <label class="form-label small fw-bold text-muted">Service Category</label>
+            <div class="btn-group w-100 btn-group-sm" role="group">
+              <input type="radio" class="btn-check" name="category" id="catAll" value="all" {% if category == 'all' %}checked{% endif %} onchange="this.form.submit()">
+              <label class="btn btn-outline-success" for="catAll">All</label>
+
+              <input type="radio" class="btn-check" name="category" id="catTiffin" value="tiffin" {% if category == 'tiffin' %}checked{% endif %} onchange="this.form.submit()">
+              <label class="btn btn-outline-success" for="catTiffin">Tiffin</label>
+
+              <input type="radio" class="btn-check" name="category" id="catMess" value="mess" {% if category == 'mess' %}checked{% endif %} onchange="this.form.submit()">
+              <label class="btn btn-outline-success" for="catMess">Mess</label>
+            </div>
+          </div>
+
+          <!-- Food Type -->
+          <div class="mb-3">
+            <label class="form-label small fw-bold text-muted">Dietary Preference</label>
+            <select name="food_type" class="form-select form-select-sm" onchange="this.form.submit()">
+              <option value="all" {% if food_type == 'all' %}selected{% endif %}>All Meal Types</option>
+              <option value="veg" {% if food_type == 'veg' %}selected{% endif %}>Pure Vegetarian / Jain</option>
+              <option value="non-veg" {% if food_type == 'non-veg' %}selected{% endif %}>Includes Non-Veg</option>
+            </select>
+          </div>
+
+          <!-- Min Rating -->
+          <div class="mb-3">
+            <label class="form-label small fw-bold text-muted">Minimum Rating</label>
+            <select name="min_rating" class="form-select form-select-sm" onchange="this.form.submit()">
+              <option value="">Any Rating</option>
+              <option value="3.5" {% if min_rating == '3.5' %}selected{% endif %}>⭐ 3.5 & above</option>
+              <option value="4.0" {% if min_rating == '4.0' %}selected{% endif %}>⭐ 4.0 & above</option>
+              <option value="4.5" {% if min_rating == '4.5' %}selected{% endif %}>⭐ 4.5 & above</option>
+            </select>
+          </div>
+
+          <!-- Min Trust Score -->
+          <div class="mb-3">
+            <label class="form-label small fw-bold text-muted">Review Trust Score</label>
+            <select name="min_trust" class="form-select form-select-sm" onchange="this.form.submit()">
+              <option value="">Any Trust Score</option>
+              <option value="70" {% if min_trust == '70' %}selected{% endif %}>🛡 70 & above</option>
+              <option value="80" {% if min_trust == '80' %}selected{% endif %}>🟢 Likely Authentic (80+)</option>
+              <option value="90" {% if min_trust == '90' %}selected{% endif %}>🟢 High Confidence (90+)</option>
+            </select>
+          </div>
+
+          <!-- Max Budget -->
+          <div class="mb-4">
+            <label class="form-label small fw-bold text-muted">Max Budget (₹/Month)</label>
+            <input type="number" name="max_price" class="form-control form-control-sm" placeholder="e.g. 2500" value="{{ max_price }}" onchange="this.form.submit()">
+          </div>
+
+          <!-- Sort -->
+          <div class="mb-3">
+            <label class="form-label small fw-bold text-muted">Sort Results By</label>
+            <select name="sort_by" class="form-select form-select-sm" onchange="this.form.submit()">
+              <option value="distance" {% if sort_by == 'distance' %}selected{% endif %}>Nearest Distance</option>
+              <option value="trust" {% if sort_by == 'trust' %}selected{% endif %}>Highest Trust Score</option>
+              <option value="rating" {% if sort_by == 'rating' %}selected{% endif %}>Highest Star Rating</option>
+              <option value="price_asc" {% if sort_by == 'price_asc' %}selected{% endif %}>Price: Low to High</option>
+            </select>
+          </div>
+
+          <button type="submit" class="btn btn-success w-100 btn-sm fw-semibold">Apply Filters</button>
+        </form>
+      </div>
+    </div>
+
+    <!-- Right Listings & Map -->
+    <div class="col-lg-9">
+      <!-- Search Summary Header -->
+      <div class="d-flex flex-wrap justify-content-between align-items-center mb-3 pb-2 border-bottom gap-2">
+        <div>
+          <h4 class="fw-bold mb-1">Nearby Tiffin & Mess Services</h4>
+          <p class="text-muted small mb-0">
+            Found <strong>{{ providers|length }}</strong> provider(s) within {{ radius }} km of <em>{{ location_query }}</em>
+          </p>
+        </div>
+        <div class="d-flex align-items-center gap-2">
+          <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 d-none d-md-inline">
+            <i class="bi bi-geo-alt-fill me-1"></i> OpenMaps Active
+          </span>
+          <button type="button" class="btn btn-success btn-sm fw-semibold shadow-sm d-flex align-items-center gap-1" id="btnGeminiDiscover">
+            <i class="bi bi-stars"></i>
+            <span>AI Discover with Gemini</span>
+          </button>
+          <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-toggle="modal" data-bs-target="#googleSyncModal" title="Map & Sync Settings">
+            <i class="bi bi-gear"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- Interactive Map Area -->
+      <div class="card border-0 shadow-sm rounded-4 mb-4 p-2 bg-white">
+        <div class="d-flex justify-content-between align-items-center px-2 py-1">
+          <small class="fw-bold text-muted"><i class="bi bi-map me-1 text-primary"></i> Interactive Location Map</small>
+          <small class="text-muted">Click any marker to preview trust details</small>
+        </div>
+        <div id="discovery-map"></div>
+      </div>
+
+      <!-- Provider Cards Grid -->
+      {% if providers %}
+        <div class="row g-3">
+          {% for p in providers %}
+            <div class="col-md-6 col-xl-4">
+              <div class="provider-card">
+                <div class="card-food-header {{ p.category }}">
+                  <span class="category-tag">{{ p.category }}</span>
+                  <button class="favorite-toggle-btn {% if p.id in user_fav_ids %}active{% endif %}" data-provider-id="{{ p.id }}" title="Save to favorites">
+                    <i class="bi {% if p.id in user_fav_ids %}bi-heart-fill{% else %}bi-heart{% endif %}"></i>
+                  </button>
+                  <span class="fs-1">
+                    {% if p.category == 'tiffin' %}🍱{% elif p.category == 'mess' %}🍛{% else %}🍲{% endif %}
+                  </span>
+                </div>
+
+                <div class="p-3 d-flex flex-column flex-grow-1">
+                  <div class="d-flex justify-content-between align-items-start mb-2">
+                    <h5 class="fw-bold mb-0 text-dark">{{ p.name }}</h5>
+                  </div>
+
+                  <!-- Trust Badge -->
+                  <div class="mb-2">
+                    {% if p.trust_badge == 'likely_authentic' %}
+                      <span class="trust-score-badge likely_authentic">
+                        <i class="bi bi-shield-check"></i> Trust: {{ p.review_trust_score }}/100
+                      </span>
+                    {% elif p.trust_badge == 'potentially_suspicious' %}
+                      <span class="trust-score-badge potentially_suspicious">
+                        <i class="bi bi-shield-exclamation"></i> Trust: {{ p.review_trust_score }}/100
+                      </span>
+                    {% else %}
+                      <span class="trust-score-badge highly_suspicious">
+                        <i class="bi bi-shield-x"></i> Trust: {{ p.review_trust_score }}/100
+                      </span>
+                    {% endif %}
+                  </div>
+
+                  <!-- Distance and rating -->
+                  <div class="small text-muted mb-2">
+                    {% if p.distance_km is not none %}
+                      <span class="me-2 text-dark fw-semibold"><i class="bi bi-pin-map text-danger me-1"></i>{{ p.distance_km }} km away</span>
+                    {% endif %}
+                    <span>⭐ {{ p.source_rating }} / 5 ({{ p.source_review_count }} reviews)</span>
+                  </div>
+
+                  <!-- Badges for meal & price -->
+                  <div class="d-flex flex-wrap gap-1 mb-3">
+                    {% if p.food_type == 'veg' %}
+                      <span class="badge badge-veg">Pure Veg</span>
+                    {% elif p.food_type == 'jain_available' %}
+                      <span class="badge badge-jain">Jain Friendly</span>
+                    {% else %}
+                      <span class="badge badge-non-veg">Veg / Non-Veg</span>
+                    {% endif %}
+
+                    {% if p.price_per_month %}
+                      <span class="badge bg-light text-dark border">₹{{ p.price_per_month }}/mo</span>
+                    {% endif %}
+
+                    {% if p.delivery_available %}
+                      <span class="badge bg-light text-success border"><i class="bi bi-bicycle me-1"></i>Delivery</span>
+                    {% endif %}
+                  </div>
+
+                  <!-- AI Grounded Summary -->
+                  {% if p.analysis and p.analysis.ai_summary %}
+                    <div class="bg-light p-2 rounded-3 mb-3 small text-muted">
+                      <strong class="text-dark d-block" style="font-size: 0.75rem;">AI REVIEW INSIGHT:</strong>
+                      {{ p.analysis.ai_summary[:100] }}...
+                    </div>
+                  {% endif %}
+
+                  <!-- Action Buttons -->
+                  <div class="mt-auto pt-2 border-top d-flex gap-2">
+                    <a href="{{ url_for('provider.details', provider_id=p.id) }}" class="btn btn-success btn-sm flex-grow-1 fw-semibold">
+                      View Details & Analysis
+                    </a>
+                    <a href="{{ url_for('provider.compare', p1=p.id) }}" class="btn btn-outline-secondary btn-sm" title="Compare with another provider">
+                      <i class="bi bi-arrow-left-right"></i>
+                    </a>
+                  </div>
+                </div>
+              </div>
+            </div>
+          {% endfor %}
+        </div>
+      {% else %}
+        <!-- Empty State -->
+        <div class="card border-0 shadow-sm rounded-4 p-5 text-center bg-white my-4">
+          <span class="fs-1 text-muted mb-2">🍽</span>
+          <h4 class="fw-bold">No providers found in this radius</h4>
+          <p class="text-muted small mb-4">
+            Try discovering authentic local mess & tiffin providers with Gemini AI, or expand your search radius.
+          </p>
+          <div class="d-flex justify-content-center gap-2 flex-wrap">
+            <button type="button" class="btn btn-success btn-sm fw-semibold btn-gemini-discover">
+              <i class="bi bi-stars me-1"></i> Discover Places with Gemini AI
+            </button>
+            <a href="{{ url_for('provider.discovery', radius=10) }}" class="btn btn-outline-success btn-sm fw-semibold">
+              Expand to 10 km Radius
+            </a>
+          </div>
+        </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+
+<!-- Modal for Real Places Sync & Optional API Key Configuration -->
+<div class="modal fade" id="googleSyncModal" tabindex="-1" aria-labelledby="googleSyncModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content rounded-4 border-0 shadow">
+      <div class="modal-header border-bottom pb-3">
+        <h5 class="modal-title fw-bold" id="googleSyncModalLabel">
+          <i class="bi bi-geo-alt-fill text-success me-2"></i> Discover Real Nearby Places
+        </h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body py-3">
+        <div class="alert alert-success bg-success bg-opacity-10 border-success border-opacity-25 text-dark small mb-3">
+          <i class="bi bi-check-circle-fill text-success me-1"></i>
+          <strong>No API key required!</strong> Tifinify automatically discovers real verified tiffin & mess services for
+          <strong>{{ location_query }}</strong> and analyzes customer reviews with our explainable AI Trust Engine.
+        </div>
+
+        <!-- Dynamic Status Alert -->
+        <div id="googleSyncStatus" class="alert d-none small mb-3" role="alert"></div>
+
+        <button type="button" class="btn btn-success w-100 py-2 fw-semibold mb-3 shadow-sm" id="btnTriggerGoogleSync">
+          <i class="bi bi-cloud-arrow-down-fill me-1"></i> Fetch Real Places for {{ location_query }} Now
+        </button>
+
+        <!-- Optional Accordion for Advanced Google Maps Key -->
+        <div class="accordion" id="advancedKeyAccordion">
+          <div class="accordion-item border rounded-3 overflow-hidden">
+            <h2 class="accordion-header" id="headingKey">
+              <button class="accordion-button collapsed py-2 small fw-bold bg-light text-muted" type="button" data-bs-toggle="collapse" data-bs-target="#collapseKey" aria-expanded="false" aria-controls="collapseKey">
+                <i class="bi bi-key me-2"></i> Advanced: Google Cloud API Key (Optional)
+              </button>
+            </h2>
+            <div id="collapseKey" class="accordion-collapse collapse" aria-labelledby="headingKey" data-bs-parent="#advancedKeyAccordion">
+              <div class="accordion-body p-3 small text-muted">
+                <p class="mb-2">
+                  An API key is <strong>strictly optional</strong>. If you have a billing-enabled Google Cloud account and wish to use Google Maps satellite tiles or live Google Places worldwide:
+                </p>
+                <div class="input-group input-group-sm mb-2">
+                  <input type="password" id="inputGoogleApiKey" class="form-control" placeholder="AIzaSy..." value="{{ google_maps_api_key or '' }}">
+                  <button class="btn btn-outline-secondary" type="button" id="btnSaveGoogleKey">Save</button>
+                </div>
+                <div class="form-text text-muted" style="font-size: 0.75rem;">
+                  Leave empty if you do not have an API key. Tifinify operates 100% free with interactive map tiles.
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer border-top pt-2">
+        <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+  (function() {
+    function launchDiscoveryMap() {
+      const providers = {{ providers|tojson }};
+      const centerLat = {{ user_lat }};
+      const centerLng = {{ user_lon }};
+
+      if (typeof initOpenMap === "function") {
+        initOpenMap("discovery-map", centerLat, centerLng, providers);
+      } else {
+        setTimeout(launchDiscoveryMap, 100);
+      }
+    }
+
+    if (document.readyState === "loading") {
+      document.addEventListener("DOMContentLoaded", launchDiscoveryMap);
+    } else {
+      launchDiscoveryMap();
+    }
+  })();
+</script>
+{% endblock %}

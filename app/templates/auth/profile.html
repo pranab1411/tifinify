@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+
+{% block title %}User Preferences & Profile | Tifinify{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+  <div class="max-w-600 mx-auto">
+    <div class="card border-0 shadow-sm rounded-4 p-4 p-lg-5 bg-white">
+      <div class="d-flex align-items-center gap-3 mb-4">
+        <div class="bg-success bg-opacity-10 text-success p-3 rounded-circle fs-3">
+          <i class="bi bi-person-fill"></i>
+        </div>
+        <div>
+          <h4 class="fw-bold mb-0">{{ user.name }}</h4>
+          <span class="badge bg-light text-muted border">{{ user.email }}</span>
+          {% if user.is_admin %}
+            <span class="badge bg-primary ms-1">Administrator</span>
+          {% endif %}
+        </div>
+      </div>
+
+      <h5 class="fw-bold mb-3 text-dark">Meal Preferences</h5>
+      <form action="{{ url_for('auth.profile') }}" method="POST">
+        <div class="mb-3">
+          <label class="form-label small fw-bold text-muted">Full Name</label>
+          <input type="text" name="name" class="form-control" value="{{ user.name }}" required>
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label small fw-bold text-muted">Dietary Preference</label>
+          <select name="dietary_preference" class="form-select">
+            <option value="all" {% if user.dietary_preference == 'all' %}selected{% endif %}>All Food Types</option>
+            <option value="veg" {% if user.dietary_preference == 'veg' %}selected{% endif %}>Pure Vegetarian</option>
+            <option value="jain" {% if user.dietary_preference == 'jain' %}selected{% endif %}>Jain Friendly</option>
+          </select>
+        </div>
+
+        <div class="mb-4">
+          <label class="form-label small fw-bold text-muted">Default Search Radius (km)</label>
+          <input type="number" name="default_radius_km" class="form-control" value="{{ user.default_radius_km or 5.0 }}" step="0.5" min="1" max="25">
+        </div>
+
+        <button type="submit" class="btn btn-success fw-semibold px-4">
+          Save Preferences
+        </button>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

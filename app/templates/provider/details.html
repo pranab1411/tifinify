@@ -1,0 +1,286 @@
+{% extends "base.html" %}
+
+{% block title %}{{ provider.name }} - AI Review Trust Profile | Tifinify{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+  <!-- Top Breadcrumb & Action Bar -->
+  <div class="d-flex flex-wrap justify-content-between align-items-center mb-3">
+    <nav aria-label="breadcrumb">
+      <ol class="breadcrumb mb-0">
+        <li class="breadcrumb-item"><a href="{{ url_for('provider.discovery') }}" class="text-decoration-none">Discovery</a></li>
+        <li class="breadcrumb-item active" aria-current="page">{{ provider.name }}</li>
+      </ol>
+    </nav>
+    <div class="d-flex gap-2">
+      <a href="{{ url_for('provider.compare', p1=provider.id) }}" class="btn btn-outline-secondary btn-sm">
+        <i class="bi bi-arrow-left-right me-1"></i> Compare Provider
+      </a>
+      <a href="{{ url_for('review.submit_review', provider_id=provider.id) }}" class="btn btn-success btn-sm fw-semibold">
+        <i class="bi bi-pencil-square me-1"></i> Write a Review
+      </a>
+    </div>
+  </div>
+
+  <!-- Provider Header Card -->
+  <div class="card border-0 shadow-sm rounded-4 p-4 bg-white mb-4">
+    <div class="row g-4 align-items-center">
+      <div class="col-lg-8">
+        <div class="d-flex align-items-center gap-2 mb-2">
+          <span class="badge bg-success bg-opacity-10 text-success text-uppercase fw-bold">{{ provider.category }}</span>
+          {% if provider.food_type == 'veg' %}
+            <span class="badge badge-veg">Pure Veg</span>
+          {% elif provider.food_type == 'jain_available' %}
+            <span class="badge badge-jain">Jain Available</span>
+          {% else %}
+            <span class="badge badge-non-veg">Veg / Non-Veg</span>
+          {% endif %}
+          {% if provider.delivery_available %}
+            <span class="badge bg-light text-success border"><i class="bi bi-bicycle me-1"></i>Delivery</span>
+          {% endif %}
+        </div>
+
+        <h2 class="fw-bold mb-2 text-dark">{{ provider.name }}</h2>
+        <p class="text-muted small mb-2"><i class="bi bi-geo-alt-fill text-danger me-1"></i> {{ provider.address }}</p>
+
+        {% if provider.description %}
+          <p class="text-muted small mb-3">{{ provider.description }}</p>
+        {% endif %}
+
+        <div class="d-flex flex-wrap gap-3 small text-muted">
+          {% if provider.phone %}
+            <div><i class="bi bi-telephone text-primary me-1"></i> {{ provider.phone }}</div>
+          {% endif %}
+          {% if provider.opening_hours %}
+            <div><i class="bi bi-clock text-primary me-1"></i> {{ provider.opening_hours }}</div>
+          {% endif %}
+          {% if provider.price_per_month %}
+            <div><i class="bi bi-currency-rupee text-success me-1"></i> <strong>₹{{ provider.price_per_month }}/mo</strong></div>
+          {% endif %}
+        </div>
+      </div>
+
+      <!-- Trust & Rating Cards Column -->
+      <div class="col-lg-4">
+        <div class="p-3 bg-light rounded-4 border">
+          <!-- Star Rating vs Trust Score Differentiator -->
+          <div class="row text-center g-2">
+            <div class="col-6 border-end">
+              <small class="text-muted d-block fw-semibold mb-1">Source Rating</small>
+              <div class="fs-3 fw-bold text-dark">⭐ {{ provider.source_rating }}</div>
+              <small class="text-muted">({{ provider.source_review_count }} reviews)</small>
+            </div>
+            <div class="col-6">
+              <small class="text-muted d-block fw-semibold mb-1">Review Trust</small>
+              <div class="fs-3 fw-bold {% if provider.review_trust_score >= 80 %}text-success{% elif provider.review_trust_score >= 50 %}text-warning{% else %}text-danger{% endif %}">
+                🛡 {{ provider.review_trust_score }}/100
+              </div>
+              <small class="fw-bold {% if provider.review_trust_score >= 80 %}text-success{% elif provider.review_trust_score >= 50 %}text-warning{% else %}text-danger{% endif %}">
+                {% if provider.trust_badge == 'likely_authentic' %}Likely Authentic{% elif provider.trust_badge == 'potentially_suspicious' %}Potentially Suspicious{% else %}Highly Suspicious{% endif %}
+              </small>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- AI Review Intelligence Section -->
+  <div class="row g-4 mb-4">
+    <!-- AI Summary & Signal Checklist -->
+    <div class="col-lg-7">
+      <div class="card border-0 shadow-sm rounded-4 p-4 bg-white h-100">
+        <div class="d-flex align-items-center gap-2 mb-3">
+          <span class="fs-4">🤖</span>
+          <div>
+            <h5 class="fw-bold mb-0">AI Review Intelligence</h5>
+            <small class="text-muted">Multi-signal NLP analysis grounded strictly in customer reviews</small>
+          </div>
+        </div>
+
+        <!-- Grounded Gemini AI Summary -->
+        <div class="ai-summary-card mb-4">
+          <div class="d-flex align-items-center gap-2 mb-2">
+            <span class="ai-pill">Grounded Summary</span>
+            <small class="text-muted">Synthesized from customer experiences</small>
+          </div>
+          <p class="mb-0 text-dark small fw-medium">
+            "{{ provider.analysis.ai_summary if provider.analysis and provider.analysis.ai_summary else 'Not enough review data to generate a reliable summary.' }}"
+          </p>
+        </div>
+
+        <!-- Transparent Review Signals Checklist -->
+        <h6 class="fw-bold mb-3 text-dark">Detected Behavioral & Linguistic Signals</h6>
+        <div class="d-flex flex-column gap-2 mb-3">
+          {% if provider.analysis and provider.analysis.detected_signals %}
+            {% for sig in provider.analysis.detected_signals %}
+              <div class="d-flex align-items-center gap-2 small p-2 rounded bg-light">
+                {% if 'repeated' in sig.lower() or 'conflict' in sig.lower() or 'burst' in sig.lower() or 'polarization' in sig.lower() %}
+                  <i class="bi bi-exclamation-triangle-fill text-warning fs-6"></i>
+                  <span class="text-dark">{{ sig }}</span>
+                {% else %}
+                  <i class="bi bi-check-circle-fill text-success fs-6"></i>
+                  <span class="text-dark">{{ sig }}</span>
+                {% endif %}
+              </div>
+            {% endfor %}
+          {% else %}
+            <p class="text-muted small">No specific signals flagged for this provider.</p>
+          {% endif %}
+        </div>
+
+        <div class="alert alert-light border small text-muted mb-0 mt-auto">
+          <i class="bi bi-info-circle me-1 text-primary"></i>
+          <em>Disclaimer: This score reflects detectable textual and statistical patterns; it is not proof of reviewer real-world intent.</em>
+        </div>
+      </div>
+    </div>
+
+    <!-- Aspect Breakdown & Sentiment Chart -->
+    <div class="col-lg-5">
+      <div class="card border-0 shadow-sm rounded-4 p-4 bg-white h-100">
+        <h5 class="fw-bold mb-3">Food & Service Aspects</h5>
+        
+        <!-- Aspect Progress Bars -->
+        <div class="mb-4">
+          {% if provider.analysis and provider.analysis.aspects %}
+            {% for asp, score in provider.analysis.aspects.items() %}
+              <div class="aspect-meter">
+                <div class="aspect-label">
+                  <span class="text-capitalize">{{ asp.replace('_', ' ') }}</span>
+                  <span class="text-success fw-bold">{{ score }}%</span>
+                </div>
+                <div class="progress">
+                  <div class="progress-bar progress-bar-aspect" style="width: {{ score }}%;"></div>
+                </div>
+              </div>
+            {% endfor %}
+          {% else %}
+            <p class="text-muted small">Aspect sentiments will appear once more reviews are posted.</p>
+          {% endif %}
+        </div>
+
+        <!-- Sentiment Doughnut Chart -->
+        <h6 class="fw-bold mb-2">Overall Review Sentiment</h6>
+        <div style="height: 160px; position: relative;">
+          <canvas id="sentimentChart"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Map and Reviews Section -->
+  <div class="row g-4">
+    <!-- Reviews Column -->
+    <div class="col-lg-8">
+      <div class="card border-0 shadow-sm rounded-4 p-4 bg-white">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+          <h5 class="fw-bold mb-0">Customer Reviews & Trust Audit ({{ provider.reviews|length }})</h5>
+          <a href="{{ url_for('review.submit_review', provider_id=provider.id) }}" class="btn btn-outline-success btn-sm">
+            + Add Review
+          </a>
+        </div>
+
+        {% if provider.reviews %}
+          <div class="d-flex flex-column gap-3">
+            {% for r in provider.reviews %}
+              <div class="p-3 border rounded-3 bg-light bg-opacity-50">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                  <div>
+                    <strong class="text-dark">{{ r.reviewer_name }}</strong>
+                    <span class="badge bg-white text-dark border ms-2">⭐ {{ r.rating }} / 5</span>
+                    <small class="text-muted ms-2">{{ r.review_date }}</small>
+                  </div>
+
+                  <!-- Review Level Authenticity Badge -->
+                  {% if r.analysis %}
+                    {% if r.analysis.suspicion_level == 'likely_authentic' %}
+                      <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25" title="Authenticity score: {{ r.analysis.authenticity_score }}/100">
+                        <i class="bi bi-shield-check me-1"></i> Likely Authentic
+                      </span>
+                    {% elif r.analysis.suspicion_level == 'potentially_suspicious' %}
+                      <span class="badge bg-warning bg-opacity-25 text-dark border border-warning" title="Authenticity score: {{ r.analysis.authenticity_score }}/100">
+                        <i class="bi bi-shield-exclamation me-1"></i> Potentially Suspicious
+                      </span>
+                    {% else %}
+                      <span class="badge bg-danger bg-opacity-10 text-danger border border-danger border-opacity-25" title="Authenticity score: {{ r.analysis.authenticity_score }}/100">
+                        <i class="bi bi-shield-x me-1"></i> Suspicious Pattern
+                      </span>
+                    {% endif %}
+                  {% endif %}
+                </div>
+
+                <p class="text-dark small mb-2">{{ r.review_text }}</p>
+
+                <!-- Signal tags on this review -->
+                {% if r.analysis and r.analysis.signals %}
+                  <div class="d-flex flex-wrap gap-1 mt-1">
+                    {% for sig in r.analysis.signals %}
+                      <span class="badge bg-warning bg-opacity-10 text-dark border small" style="font-size: 0.7rem;">
+                        ⚠ {{ sig.replace('_', ' ') }}
+                      </span>
+                    {% endfor %}
+                    {% if r.analysis.duplicate_similarity_score > 0.4 %}
+                      <span class="badge bg-light text-muted border small" style="font-size: 0.7rem;">
+                        TF-IDF similarity: {{ (r.analysis.duplicate_similarity_score * 100)|round(0) }}%
+                      </span>
+                    {% endif %}
+                  </div>
+                {% endif %}
+              </div>
+            {% endfor %}
+          </div>
+        {% else %}
+          <div class="text-center py-4 text-muted">
+            <i class="bi bi-chat-square-text fs-2 d-block mb-2"></i>
+            No reviews yet. Be the first to review this service!
+          </div>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- Location Map Column -->
+    <div class="col-lg-4">
+      <div class="card border-0 shadow-sm rounded-4 p-3 bg-white sticky-top" style="top: 80px;">
+        <h6 class="fw-bold mb-2"><i class="bi bi-pin-map text-danger me-1"></i> Location</h6>
+        <p class="small text-muted mb-2">{{ provider.address }}</p>
+        <div id="provider-map" class="mb-3"></div>
+        <div class="small text-muted text-center">
+          Coordinates: {{ provider.latitude }}, {{ provider.longitude }}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+  (function() {
+    function launchDetailsMap() {
+      // 1. Initialize Sentiment Chart
+      const sentData = {{ provider.analysis.sentiment_distribution|tojson if provider.analysis and provider.analysis.sentiment_distribution else '{"positive": 80, "neutral": 15, "negative": 5}'|safe }};
+      if (typeof renderSentimentChart === "function") {
+        renderSentimentChart("sentimentChart", sentData.positive, sentData.neutral, sentData.negative);
+      }
+
+      // 2. Initialize Provider Map with OpenMaps
+      const pLat = {{ provider.latitude }};
+      const pLng = {{ provider.longitude }};
+      const providerObj = [{{ provider|tojson }}];
+
+      if (typeof initOpenMap === "function") {
+        initOpenMap("provider-map", pLat, pLng, providerObj, { zoom: 15 });
+      } else {
+        setTimeout(launchDetailsMap, 100);
+      }
+    }
+
+    if (document.readyState === "loading") {
+      document.addEventListener("DOMContentLoaded", launchDetailsMap);
+    } else {
+      launchDetailsMap();
+    }
+  })();
+</script>
+{% endblock %}

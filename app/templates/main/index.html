@@ -1,0 +1,242 @@
+{% extends "base.html" %}
+
+{% block title %}Tifinify | Find Food Nearby. Understand Reviews. Choose With Confidence.{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="hero-section">
+  <div class="container">
+    <div class="row align-items-center g-5">
+      <div class="col-lg-6">
+        <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 px-3 py-2 rounded-pill fw-semibold mb-3">
+          <i class="bi bi-shield-check me-1"></i> AI-Powered Review Intelligence
+        </span>
+        <h1 class="hero-title mb-3">
+          Find food nearby.<br>
+          <span class="text-success">Understand the reviews.</span><br>
+          Choose with confidence.
+        </h1>
+        <p class="hero-tagline mb-4">
+          Discover trusted tiffin services, student messes, and home-cooked meal providers near you. We analyze review patterns so you don't have to rely on star ratings alone.
+        </p>
+
+        <!-- Location Search Box -->
+        <div class="search-card">
+          <form action="{{ url_for('provider.discovery') }}" method="GET">
+            <div class="row g-2 align-items-center">
+              <div class="col-md-7">
+                <div class="input-group">
+                  <span class="input-group-text bg-light border-end-0 text-muted">
+                    <i class="bi bi-geo-alt-fill text-danger"></i>
+                  </span>
+                  <input type="text" name="location" class="form-control border-start-0" placeholder="Enter your city or area (e.g. Kolkata, Delhi, Bangalore)" value="{{ session.get('user_location', '') }}" required>
+                </div>
+              </div>
+              <div class="col-md-5 d-flex gap-2">
+                <select name="radius" class="form-select">
+                  <option value="1">1 km radius</option>
+                  <option value="3">3 km radius</option>
+                  <option value="5" selected>5 km radius</option>
+                  <option value="10">10 km radius</option>
+                </select>
+                <button type="button" class="btn btn-outline-secondary btn-use-location" title="Use current GPS location">
+                  <i class="bi bi-crosshair"></i>
+                </button>
+              </div>
+              <input type="hidden" name="lat" id="homeLat" value="">
+              <input type="hidden" name="lng" id="homeLng" value="">
+              <div class="col-12 mt-3">
+                <button type="submit" class="btn btn-success w-100 py-2 fw-semibold fs-5 shadow-sm">
+                  <i class="bi bi-search me-2"></i> Find Tiffin & Mess Services
+                </button>
+              </div>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <div class="col-lg-6 text-center">
+        <!-- Interactive Preview Illustration / Card -->
+        <div class="card border-0 shadow-lg p-3 bg-white" style="border-radius: 24px;">
+          <div class="card-food-header rounded-4 mb-3 d-flex flex-column justify-content-center">
+            <span class="fs-1">🍲</span>
+            <h5 class="fw-bold mb-0">Review Trust In Action</h5>
+          </div>
+          <div class="p-2 text-start">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+              <span class="fw-bold fs-5">Annapurna Homely Tiffin</span>
+              <span class="trust-score-badge likely_authentic">
+                <i class="bi bi-shield-check"></i> Trust: 94/100
+              </span>
+            </div>
+            <div class="small text-muted mb-3">📍 1.2 km away • ⭐ 4.6 / 5 (38 reviews)</div>
+            
+            <!-- Aspects Demo -->
+            <div class="row g-2 mb-3">
+              <div class="col-6">
+                <div class="bg-light p-2 rounded">
+                  <small class="text-muted d-block">Taste & Flavor</small>
+                  <strong class="text-success">92% Positive</strong>
+                </div>
+              </div>
+              <div class="col-6">
+                <div class="bg-light p-2 rounded">
+                  <small class="text-muted d-block">Kitchen Hygiene</small>
+                  <strong class="text-success">88% Positive</strong>
+                </div>
+              </div>
+            </div>
+
+            <div class="ai-summary-card">
+              <div class="d-flex align-items-center gap-2 mb-1">
+                <span class="ai-pill">AI Summary</span>
+                <small class="text-muted">Grounded in verified reviews</small>
+              </div>
+              <p class="small mb-0 text-dark">
+                "Customers consistently praise the homestyle taste and soft rotis. Packaging is hygienic, while delivery timing is dependable."
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- "How It Works" Section -->
+<section class="py-5 bg-white border-bottom">
+  <div class="container py-4">
+    <div class="text-center max-w-700 mx-auto mb-5">
+      <h6 class="text-success fw-bold text-uppercase tracking-wider">Simple 4-Step Process</h6>
+      <h2 class="fw-bold">How Tifinify Works</h2>
+      <p class="text-muted">Empowering students and working professionals to choose daily meals with total transparency.</p>
+    </div>
+
+    <div class="row g-4">
+      <div class="col-md-6 col-lg-3">
+        <div class="step-card">
+          <div class="step-number">1</div>
+          <h5 class="fw-bold mb-2">Discover</h5>
+          <p class="text-muted small mb-0">Search your neighborhood or campus area by custom radius (1, 3, 5, or 10 km).</p>
+        </div>
+      </div>
+      <div class="col-md-6 col-lg-3">
+        <div class="step-card">
+          <div class="step-number">2</div>
+          <h5 class="fw-bold mb-2">Analyze</h5>
+          <p class="text-muted small mb-0">Our NLP engine scans reviews for copy-paste duplicates, marketing jargon, and rating contradictions.</p>
+        </div>
+      </div>
+      <div class="col-md-6 col-lg-3">
+        <div class="step-card">
+          <div class="step-number">3</div>
+          <h5 class="fw-bold mb-2">Understand</h5>
+          <p class="text-muted small mb-0">View aspect sentiments (taste, hygiene, delivery) alongside a transparent Review Trust Score.</p>
+        </div>
+      </div>
+      <div class="col-md-6 col-lg-3">
+        <div class="step-card">
+          <div class="step-number">4</div>
+          <h5 class="fw-bold mb-2">Decide</h5>
+          <p class="text-muted small mb-0">Compare providers side-by-side using objective metrics rather than manipulated star ratings.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Featured Providers -->
+<section class="py-5 bg-light">
+  <div class="container py-3">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+      <div>
+        <h3 class="fw-bold mb-1">Featured Tiffin & Mess Services</h3>
+        <p class="text-muted small mb-0">Explore verified listings with active review intelligence profiles.</p>
+      </div>
+      <a href="{{ url_for('provider.discovery') }}" class="btn btn-outline-success btn-sm fw-semibold">
+        View All Listings <i class="bi bi-arrow-right ms-1"></i>
+      </a>
+    </div>
+
+    <div class="row g-4">
+      {% for p in featured_providers %}
+        <div class="col-md-4">
+          <div class="provider-card">
+            <div class="card-food-header {{ p.category }}">
+              <span class="category-tag">{{ p.category }}</span>
+              <span class="fs-1">
+                {% if p.category == 'tiffin' %}🍱{% elif p.category == 'mess' %}🍛{% else %}🍲{% endif %}
+              </span>
+            </div>
+            <div class="p-3 d-flex flex-column flex-grow-1">
+              <div class="d-flex justify-content-between align-items-start mb-2">
+                <h5 class="fw-bold mb-0 text-dark">{{ p.name }}</h5>
+                {% if p.trust_badge == 'likely_authentic' %}
+                  <span class="trust-score-badge likely_authentic">🛡 {{ p.review_trust_score }}/100</span>
+                {% elif p.trust_badge == 'potentially_suspicious' %}
+                  <span class="trust-score-badge potentially_suspicious">⚠ {{ p.review_trust_score }}/100</span>
+                {% else %}
+                  <span class="trust-score-badge highly_suspicious">🔴 {{ p.review_trust_score }}/100</span>
+                {% endif %}
+              </div>
+
+              <div class="small text-muted mb-2">
+                <i class="bi bi-geo-alt me-1"></i> {{ p.locality }}
+              </div>
+
+              <div class="d-flex flex-wrap gap-2 mb-3">
+                <span class="badge bg-light text-dark border">⭐ {{ p.source_rating }} / 5</span>
+                {% if p.food_type == 'veg' %}
+                  <span class="badge badge-veg">Pure Veg</span>
+                {% elif p.food_type == 'jain_available' %}
+                  <span class="badge badge-jain">Jain Available</span>
+                {% else %}
+                  <span class="badge badge-non-veg">Veg / Non-Veg</span>
+                {% endif %}
+                {% if p.price_per_month %}
+                  <span class="badge bg-light text-dark border">₹{{ p.price_per_month }}/mo</span>
+                {% endif %}
+              </div>
+
+              {% if p.analysis and p.analysis.ai_summary %}
+                <p class="small text-muted mb-3 fst-italic">
+                  "{{ p.analysis.ai_summary[:110] }}..."
+                </p>
+              {% endif %}
+
+              <div class="mt-auto pt-2 border-top">
+                <a href="{{ url_for('provider.details', provider_id=p.id) }}" class="btn btn-outline-success w-100 fw-semibold">
+                  View Details & AI Analysis <i class="bi bi-chevron-right ms-1"></i>
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<!-- Trust Principles & Academic Note -->
+<section class="py-5 bg-white border-top">
+  <div class="container">
+    <div class="p-4 rounded-4 bg-light border">
+      <div class="row align-items-center g-4">
+        <div class="col-lg-8">
+          <h5 class="fw-bold text-dark mb-2">
+            <i class="bi bi-info-circle text-primary me-2"></i> Responsible AI Trust Analysis Principle
+          </h5>
+          <p class="text-muted small mb-0">
+            Tifinify uses advanced NLP algorithms (TF-IDF similarity, consistency heuristics, and Gemini AI synthesis) to flag statistically unusual review behavior. It does <strong>not</strong> claim to prove real-world reviewer identity or fraud, empowering consumers with objective data to make informed choices.
+          </p>
+        </div>
+        <div class="col-lg-4 text-lg-end">
+          <a href="{{ url_for('main.about') }}" class="btn btn-success fw-semibold">
+            Learn About the AI Engine
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}

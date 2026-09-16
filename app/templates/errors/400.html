@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+
+{% block title %}Bad Request (400) | Tifinify{% endblock %}
+
+{% block content %}
+<div class="container py-5 text-center my-5">
+  <span class="display-1 text-muted fw-bold d-block mb-2">400</span>
+  <h2 class="fw-bold text-dark mb-2">Bad Request</h2>
+  <p class="text-muted small mb-4">The submitted request was malformed or incomplete.</p>
+  <a href="{{ url_for('main.index') }}" class="btn btn-outline-secondary fw-semibold px-4">
+    <i class="bi bi-arrow-left me-1"></i> Back to Discovery
+  </a>
+</div>
+{% endblock %}

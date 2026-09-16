@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+
+{% block title %}Submit Review for {{ provider.name }} | Tifinify{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+  <div class="max-w-700 mx-auto">
+    <div class="card border-0 shadow-sm rounded-4 p-4 bg-white">
+      <h3 class="fw-bold mb-1">Write a Review</h3>
+      <p class="text-muted small mb-4">
+        Sharing your genuine meal experience for <strong>{{ provider.name }}</strong> ({{ provider.locality }}).
+      </p>
+
+      <form action="{{ url_for('review.submit_review', provider_id=provider.id) }}" method="POST">
+        <!-- Reviewer Name -->
+        <div class="mb-3">
+          <label class="form-label small fw-bold text-muted">Your Name</label>
+          <input type="text" name="reviewer_name" class="form-control" placeholder="Enter your name or leave blank for Anonymous" value="{{ current_user.name if current_user.is_authenticated else '' }}">
+        </div>
+
+        <!-- Rating -->
+        <div class="mb-3">
+          <label class="form-label small fw-bold text-muted">Overall Rating (1 to 5 Stars)</label>
+          <select name="rating" class="form-select">
+            <option value="5.0" selected>⭐⭐⭐⭐⭐ - Excellent (5/5)</option>
+            <option value="4.0">⭐⭐⭐⭐ - Good (4/5)</option>
+            <option value="3.0">⭐⭐⭐ - Average (3/5)</option>
+            <option value="2.0">⭐⭐ - Poor (2/5)</option>
+            <option value="1.0">⭐ - Terrible (1/5)</option>
+          </select>
+        </div>
+
+        <!-- Review Text -->
+        <div class="mb-4">
+          <label class="form-label small fw-bold text-muted">Your Detailed Experience</label>
+          <textarea name="review_text" rows="5" class="form-control" placeholder="Tell us about the taste, portion quantity, hygiene, rotis, and delivery punctuality..." required></textarea>
+          <div class="form-text small">
+            Tip: Be specific about taste, hygiene, packaging, and delivery. Our AI analyzes your feedback to update the provider's aspect scores!
+          </div>
+        </div>
+
+        <div class="d-flex justify-content-between align-items-center pt-3 border-top">
+          <a href="{{ url_for('provider.details', provider_id=provider.id) }}" class="btn btn-outline-secondary">Cancel</a>
+          <button type="submit" class="btn btn-success fw-semibold px-4">
+            <i class="bi bi-send me-1"></i> Submit Review & Trigger AI Audit
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

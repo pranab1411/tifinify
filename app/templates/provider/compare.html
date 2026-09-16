@@ -1,0 +1,175 @@
+{% extends "base.html" %}
+
+{% block title %}Compare Tiffin & Mess Services | Tifinify{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+  <div class="text-center max-w-700 mx-auto mb-4">
+    <h2 class="fw-bold">Side-by-Side Provider Comparison</h2>
+    <p class="text-muted small">Compare authentic food quality, hygiene metrics, and Review Trust Scores to make your own decision.</p>
+  </div>
+
+  <!-- Provider Selection Form -->
+  <div class="card border-0 shadow-sm rounded-4 p-3 bg-white mb-4">
+    <form action="{{ url_for('provider.compare') }}" method="GET" class="row g-3 align-items-center">
+      <div class="col-md-5">
+        <label class="form-label small fw-bold text-muted">First Provider</label>
+        <select name="p1" class="form-select" onchange="this.form.submit()">
+          <option value="">Select a provider...</option>
+          {% for p in all_providers %}
+            <option value="{{ p.id }}" {% if p1_id == p.id %}selected{% endif %}>{{ p.name }} ({{ p.locality }})</option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <div class="col-md-2 text-center text-muted fw-bold d-none d-md-block fs-5">
+        VS
+      </div>
+
+      <div class="col-md-5">
+        <label class="form-label small fw-bold text-muted">Second Provider</label>
+        <select name="p2" class="form-select" onchange="this.form.submit()">
+          <option value="">Select a provider...</option>
+          {% for p in all_providers %}
+            <option value="{{ p.id }}" {% if p2_id == p.id %}selected{% endif %}>{{ p.name }} ({{ p.locality }})</option>
+          {% endfor %}
+        </select>
+      </div>
+    </form>
+  </div>
+
+  {% if comparison %}
+    <!-- Comparison Table -->
+    <div class="card border-0 shadow-sm rounded-4 overflow-hidden bg-white mb-4">
+      <div class="table-responsive">
+        <table class="table comparison-table table-bordered mb-0">
+          <thead>
+            <tr>
+              <th style="width: 30%;">Evaluation Criteria</th>
+              <th style="width: 35%;" class="text-center bg-light">
+                <h5 class="fw-bold mb-1 text-dark">{{ comparison.provider1.name }}</h5>
+                <span class="badge bg-success bg-opacity-10 text-success text-uppercase">{{ comparison.provider1.category }}</span>
+              </th>
+              <th style="width: 35%;" class="text-center bg-light">
+                <h5 class="fw-bold mb-1 text-dark">{{ comparison.provider2.name }}</h5>
+                <span class="badge bg-success bg-opacity-10 text-success text-uppercase">{{ comparison.provider2.category }}</span>
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            <!-- Star Rating -->
+            <tr>
+              <td class="fw-semibold">Source Star Rating</td>
+              <td class="text-center fs-5 fw-bold">⭐ {{ comparison.provider1.source_rating }} / 5</td>
+              <td class="text-center fs-5 fw-bold">⭐ {{ comparison.provider2.source_rating }} / 5</td>
+            </tr>
+
+            <!-- Total Reviews -->
+            <tr>
+              <td class="fw-semibold">Review Count</td>
+              <td class="text-center">{{ comparison.provider1.source_review_count }} reviews</td>
+              <td class="text-center">{{ comparison.provider2.source_review_count }} reviews</td>
+            </tr>
+
+            <!-- Review Trust Score -->
+            <tr class="table-light">
+              <td class="fw-bold text-dark">
+                <i class="bi bi-shield-check text-success me-1"></i> Review Trust Score
+              </td>
+              <td class="text-center">
+                <span class="trust-score-badge {% if comparison.provider1.review_trust_score >= 80 %}likely_authentic{% elif comparison.provider1.review_trust_score >= 50 %}potentially_suspicious{% else %}highly_suspicious{% endif %}">
+                  🛡 {{ comparison.provider1.review_trust_score }} / 100
+                </span>
+              </td>
+              <td class="text-center">
+                <span class="trust-score-badge {% if comparison.provider2.review_trust_score >= 80 %}likely_authentic{% elif comparison.provider2.review_trust_score >= 50 %}potentially_suspicious{% else %}highly_suspicious{% endif %}">
+                  🛡 {{ comparison.provider2.review_trust_score }} / 100
+                </span>
+              </td>
+            </tr>
+
+            <!-- Food Type & Category -->
+            <tr>
+              <td class="fw-semibold">Food Preference</td>
+              <td class="text-center text-capitalize">{{ comparison.provider1.food_type.replace('_', ' ') }}</td>
+              <td class="text-center text-capitalize">{{ comparison.provider2.food_type.replace('_', ' ') }}</td>
+            </tr>
+
+            <!-- Monthly Pricing -->
+            <tr>
+              <td class="fw-semibold">Monthly Subscription</td>
+              <td class="text-center fw-bold text-success">
+                {{ '₹' + comparison.provider1.price_per_month|string + '/mo' if comparison.provider1.price_per_month else 'Not listed' }}
+              </td>
+              <td class="text-center fw-bold text-success">
+                {{ '₹' + comparison.provider2.price_per_month|string + '/mo' if comparison.provider2.price_per_month else 'Not listed' }}
+              </td>
+            </tr>
+
+            <!-- Delivery -->
+            <tr>
+              <td class="fw-semibold">Doorstep Delivery</td>
+              <td class="text-center">
+                {% if comparison.provider1.delivery_available %}
+                  <span class="text-success"><i class="bi bi-check-circle-fill me-1"></i> Available</span>
+                {% else %}
+                  <span class="text-muted"><i class="bi bi-x-circle me-1"></i> Pickup Only</span>
+                {% endif %}
+              </td>
+              <td class="text-center">
+                {% if comparison.provider2.delivery_available %}
+                  <span class="text-success"><i class="bi bi-check-circle-fill me-1"></i> Available</span>
+                {% else %}
+                  <span class="text-muted"><i class="bi bi-x-circle me-1"></i> Pickup Only</span>
+                {% endif %}
+              </td>
+            </tr>
+
+            <!-- Aspect rows -->
+            {% for row in comparison.aspect_comparison %}
+              <tr>
+                <td class="fw-semibold">{{ row.label }} Satisfaction</td>
+                <td class="text-center fw-bold text-dark">{{ row.provider1_val }}</td>
+                <td class="text-center fw-bold text-dark">{{ row.provider2_val }}</td>
+              </tr>
+            {% endfor %}
+
+            <!-- AI Summary row -->
+            <tr>
+              <td class="fw-semibold">AI Review Insight</td>
+              <td class="small text-muted p-3">
+                "{{ comparison.provider1.analysis.ai_summary if comparison.provider1.analysis and comparison.provider1.analysis.ai_summary else 'Not enough review data.' }}"
+              </td>
+              <td class="small text-muted p-3">
+                "{{ comparison.provider2.analysis.ai_summary if comparison.provider2.analysis and comparison.provider2.analysis.ai_summary else 'Not enough review data.' }}"
+              </td>
+            </tr>
+
+            <!-- Details Link -->
+            <tr>
+              <td></td>
+              <td class="text-center p-3">
+                <a href="{{ url_for('provider.details', provider_id=comparison.provider1.id) }}" class="btn btn-success btn-sm w-75 fw-semibold">
+                  View Full Analysis
+                </a>
+              </td>
+              <td class="text-center p-3">
+                <a href="{{ url_for('provider.details', provider_id=comparison.provider2.id) }}" class="btn btn-success btn-sm w-75 fw-semibold">
+                  View Full Analysis
+                </a>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  {% else %}
+    <!-- Help prompt when 2 providers aren't selected yet -->
+    <div class="card border-0 shadow-sm rounded-4 p-5 text-center bg-white">
+      <span class="fs-1 text-muted mb-2">⚖</span>
+      <h5 class="fw-bold">Select two providers above to start comparing</h5>
+      <p class="text-muted small mb-0">Compare ratings, aspect scores (Taste, Hygiene, Delivery), and AI Trust Metrics side-by-side.</p>
+    </div>
+  {% endif %}
+</div>
+{% endblock %}

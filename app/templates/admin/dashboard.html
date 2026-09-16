@@ -1,0 +1,93 @@
+{% extends "base.html" %}
+
+{% block title %}Admin Dashboard | Tifinify{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+      <h2 class="fw-bold mb-1">Tifinify Admin Dashboard</h2>
+      <p class="text-muted small mb-0">System audit telemetry, review trust overview, and provider management.</p>
+    </div>
+    <span class="badge bg-primary px-3 py-2 fs-6">Administrator Access</span>
+  </div>
+
+  <!-- KPI Metric Cards -->
+  <div class="row g-3 mb-4">
+    <div class="col-md-3">
+      <div class="card border-0 shadow-sm rounded-4 p-3 bg-white text-center">
+        <small class="text-muted fw-semibold">TOTAL PROVIDERS</small>
+        <div class="fs-2 fw-bold text-dark mt-1">{{ total_providers }}</div>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="card border-0 shadow-sm rounded-4 p-3 bg-white text-center">
+        <small class="text-muted fw-semibold">REVIEWS ANALYZED</small>
+        <div class="fs-2 fw-bold text-primary mt-1">{{ total_reviews }}</div>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="card border-0 shadow-sm rounded-4 p-3 bg-white text-center">
+        <small class="text-muted fw-semibold">POTENTIALLY SUSPICIOUS</small>
+        <div class="fs-2 fw-bold text-warning mt-1">{{ suspicious_reviews }}</div>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="card border-0 shadow-sm rounded-4 p-3 bg-white text-center">
+        <small class="text-muted fw-semibold">REGISTERED USERS</small>
+        <div class="fs-2 fw-bold text-success mt-1">{{ total_users }}</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Provider Oversight Table -->
+  <div class="card border-0 shadow-sm rounded-4 bg-white overflow-hidden mb-4">
+    <div class="p-3 border-bottom d-flex justify-content-between align-items-center">
+      <h5 class="fw-bold mb-0">Managed Providers & Trust Overview</h5>
+      <span class="badge bg-light text-muted border">{{ providers|length }} Active</span>
+    </div>
+    <div class="table-responsive">
+      <table class="table table-hover align-middle mb-0">
+        <thead class="table-light">
+          <tr>
+            <th>Provider Name</th>
+            <th>Locality</th>
+            <th>Category</th>
+            <th>Rating</th>
+            <th>AI Trust Score</th>
+            <th>Status</th>
+            <th class="text-end">Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for p in providers %}
+            <tr>
+              <td class="fw-bold text-dark">{{ p.name }}</td>
+              <td>{{ p.locality }}</td>
+              <td><span class="badge bg-light text-dark border text-uppercase">{{ p.category }}</span></td>
+              <td>⭐ {{ p.source_rating }}</td>
+              <td>
+                <span class="trust-score-badge {% if p.review_trust_score >= 80 %}likely_authentic{% elif p.review_trust_score >= 50 %}potentially_suspicious{% else %}highly_suspicious{% endif %}">
+                  🛡 {{ p.review_trust_score }} / 100
+                </span>
+              </td>
+              <td>
+                {% if p.is_demo %}
+                  <span class="badge bg-warning text-dark border">Demo Seed</span>
+                {% else %}
+                  <span class="badge bg-success">Live</span>
+                {% endif %}
+              </td>
+              <td class="text-end">
+                <a href="{{ url_for('provider.details', provider_id=p.id) }}" class="btn btn-sm btn-outline-success">
+                  Inspect Audit
+                </a>
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}

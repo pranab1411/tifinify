@@ -1,0 +1,107 @@
+{% extends "base.html" %}
+
+{% block title %}About AI Trust Architecture | Tifinify{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+  <div class="max-w-800 mx-auto">
+    <div class="text-center mb-5">
+      <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 px-3 py-2 rounded-pill fw-semibold mb-2">
+        MCA Minor Project Documentation
+      </span>
+      <h1 class="fw-bold">AI-Powered Review Trust Analysis</h1>
+      <p class="text-muted fs-5">Methodology, algorithmic formulation, and responsible AI principles.</p>
+    </div>
+
+    <!-- Project Objective -->
+    <div class="card shadow-sm border-0 mb-4 rounded-4">
+      <div class="card-body p-4">
+        <h4 class="fw-bold text-dark mb-3"><i class="bi bi-bullseye text-success me-2"></i> The Problem We Solve</h4>
+        <p class="text-muted">
+          For students, interns, and young professionals relocating to educational hubs, finding healthy, dependable daily tiffin and mess food is critical. Traditional rating platforms show aggregate stars (e.g. 4.5/5), but star ratings are susceptible to manipulation via promotional bursts, copy-paste reviews, or biased family-and-friends submissions.
+        </p>
+        <p class="text-muted mb-0">
+          <strong>Tifinify</strong> goes beyond "What is the star rating?" by asking: <em>"What are customers actually saying, how consistent are their opinions, and are there detectable suspicious linguistic patterns?"</em>
+        </p>
+      </div>
+    </div>
+
+    <!-- Review Intelligence Pipeline -->
+    <div class="card shadow-sm border-0 mb-4 rounded-4">
+      <div class="card-body p-4">
+        <h4 class="fw-bold text-dark mb-3"><i class="bi bi-cpu text-primary me-2"></i> Review Intelligence Pipeline</h4>
+        <div class="row g-3">
+          <div class="col-md-6">
+            <div class="p-3 bg-light rounded-3 h-100">
+              <h6 class="fw-bold text-dark"><i class="bi bi-1-circle text-success me-1"></i> Text Preprocessing</h6>
+              <p class="small text-muted mb-0">Normalizes whitespace, cleans unicode characters, strips HTML tags, and ensures clean text representations.</p>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="p-3 bg-light rounded-3 h-100">
+              <h6 class="fw-bold text-dark"><i class="bi bi-2-circle text-success me-1"></i> Near-Duplicate Detection</h6>
+              <p class="small text-muted mb-0">Computes word n-gram TF-IDF vectors and pairwise Cosine Similarity matrix to detect copy-paste phrasing (&ge; 0.82 similarity).</p>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="p-3 bg-light rounded-3 h-100">
+              <h6 class="fw-bold text-dark"><i class="bi bi-3-circle text-success me-1"></i> Behavioral Heuristics</h6>
+              <p class="small text-muted mb-0">Identifies rating-sentiment contradictions (e.g., 1-star with glowing praise), promotional jargon, and temporal bursts.</p>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="p-3 bg-light rounded-3 h-100">
+              <h6 class="fw-bold text-dark"><i class="bi bi-4-circle text-success me-1"></i> Aspect-Based Analysis</h6>
+              <p class="small text-muted mb-0">Extracts sentiment on Taste, Hygiene, Food Quality, Quantity, Delivery, and Value for Money across all reviews.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Trust Score Formulation -->
+    <div class="card shadow-sm border-0 mb-4 rounded-4">
+      <div class="card-body p-4">
+        <h4 class="fw-bold text-dark mb-3"><i class="bi bi-calculator text-warning me-2"></i> Review Trust Score Formula</h4>
+        <p class="text-muted">
+          The Review Trust Score is calculated using a deterministic, transparent formula that evaluates statistical anomalies:
+        </p>
+        <div class="p-3 bg-light rounded-3 font-monospace text-dark mb-3">
+          Trust Score = 100 - min(100, (P_duplicate &times; 0.35 + P_inconsistency &times; 0.30 + P_burst &times; 0.20 + P_polarization &times; 0.15))
+        </div>
+        <div class="row g-3">
+          <div class="col-md-4">
+            <div class="p-3 rounded border text-center">
+              <span class="trust-score-badge likely_authentic mb-2">🟢 Likely Authentic</span>
+              <div class="fw-bold">80 &ndash; 100</div>
+              <small class="text-muted d-block">Natural linguistic diversity & regular intervals.</small>
+            </div>
+          </div>
+          <div class="col-md-4">
+            <div class="p-3 rounded border text-center">
+              <span class="trust-score-badge potentially_suspicious mb-2">🟡 Potentially Suspicious</span>
+              <div class="fw-bold">50 &ndash; 79</div>
+              <small class="text-muted d-block">Minor phrase repetition or rating mismatches.</small>
+            </div>
+          </div>
+          <div class="col-md-4">
+            <div class="p-3 rounded border text-center">
+              <span class="trust-score-badge highly_suspicious mb-2">🔴 Highly Suspicious</span>
+              <div class="fw-bold">0 &ndash; 49</div>
+              <small class="text-muted d-block">Strong near-duplicate clusters or severe bursts.</small>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Responsible AI Principle -->
+    <div class="alert alert-warning p-4 rounded-4 border">
+      <h5 class="fw-bold"><i class="bi bi-shield-exclamation me-2"></i> Responsible AI Principle & Disclaimer</h5>
+      <p class="small mb-0">
+        Tifinify does <strong>not</strong> assert that an individual review is definitively fraudulent. The system evaluates algorithmic patterns, linguistic similarity, and statistical anomalies in available text data. Consumers should use these indicators alongside personal inquiries to make their meal decisions.
+      </p>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+
+{% block title %}Create an Account | Tifinify{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+  <div class="max-w-450 mx-auto">
+    <div class="card border-0 shadow-sm rounded-4 p-4 p-lg-5 bg-white">
+      <div class="text-center mb-4">
+        <span class="fs-1">🍱</span>
+        <h3 class="fw-bold text-dark mt-2 mb-1">Create Account</h3>
+        <p class="text-muted small">Join Tifinify to bookmark meals and contribute verified reviews.</p>
+      </div>
+
+      <form action="{{ url_for('auth.register') }}" method="POST">
+        <div class="mb-3">
+          <label class="form-label small fw-bold text-muted">Full Name</label>
+          <input type="text" name="name" class="form-control" placeholder="e.g. Rahul Sharma" required autofocus>
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label small fw-bold text-muted">Email Address</label>
+          <input type="email" name="email" class="form-control" placeholder="name@example.com" required>
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label small fw-bold text-muted">Password</label>
+          <input type="password" name="password" class="form-control" placeholder="At least 6 characters" required>
+        </div>
+
+        <div class="mb-4">
+          <label class="form-label small fw-bold text-muted">Dietary Preference</label>
+          <select name="dietary_preference" class="form-select">
+            <option value="all" selected>All Food Types (Veg & Non-Veg)</option>
+            <option value="veg">Pure Vegetarian</option>
+            <option value="jain">Jain Friendly</option>
+          </select>
+        </div>
+
+        <button type="submit" class="btn btn-success w-100 py-2 fw-semibold mb-3">
+          Create Account
+        </button>
+
+        <div class="text-center small text-muted">
+          Already have an account? <a href="{{ url_for('auth.login') }}" class="text-success fw-semibold text-decoration-none">Log in</a>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

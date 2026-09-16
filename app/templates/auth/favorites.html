@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+
+{% block title %}My Saved Favorites | Tifinify{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+      <h3 class="fw-bold mb-1">My Saved Favorites</h3>
+      <p class="text-muted small mb-0">Your bookmarked tiffin and mess providers.</p>
+    </div>
+    <a href="{{ url_for('provider.discovery') }}" class="btn btn-outline-success btn-sm">
+      <i class="bi bi-search me-1"></i> Discover More
+    </a>
+  </div>
+
+  {% if favorites %}
+    <div class="row g-4">
+      {% for p in favorites %}
+        <div class="col-md-6 col-lg-4">
+          <div class="provider-card">
+            <div class="card-food-header {{ p.category }}">
+              <span class="category-tag">{{ p.category }}</span>
+              <button class="favorite-toggle-btn active" data-provider-id="{{ p.id }}" title="Remove from favorites">
+                <i class="bi bi-heart-fill"></i>
+              </button>
+              <span class="fs-1">
+                {% if p.category == 'tiffin' %}🍱{% elif p.category == 'mess' %}🍛{% else %}🍲{% endif %}
+              </span>
+            </div>
+
+            <div class="p-3 d-flex flex-column flex-grow-1">
+              <div class="d-flex justify-content-between align-items-start mb-2">
+                <h5 class="fw-bold mb-0 text-dark">{{ p.name }}</h5>
+                <span class="trust-score-badge {% if p.review_trust_score >= 80 %}likely_authentic{% elif p.review_trust_score >= 50 %}potentially_suspicious{% else %}highly_suspicious{% endif %}">
+                  🛡 {{ p.review_trust_score }}/100
+                </span>
+              </div>
+
+              <div class="small text-muted mb-2">
+                <i class="bi bi-geo-alt me-1"></i> {{ p.locality }}
+              </div>
+
+              <div class="d-flex flex-wrap gap-1 mb-3">
+                <span class="badge bg-light text-dark border">⭐ {{ p.source_rating }} / 5</span>
+                {% if p.price_per_month %}
+                  <span class="badge bg-light text-dark border">₹{{ p.price_per_month }}/mo</span>
+                {% endif %}
+              </div>
+
+              <div class="mt-auto pt-2 border-top">
+                <a href="{{ url_for('provider.details', provider_id=p.id) }}" class="btn btn-success btn-sm w-100 fw-semibold">
+                  View Full Details & AI Audit
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  {% else %}
+    <div class="card border-0 shadow-sm rounded-4 p-5 text-center bg-white my-4">
+      <span class="fs-1 text-muted mb-2">🤍</span>
+      <h4 class="fw-bold">No saved favorites yet</h4>
+      <p class="text-muted small mb-3">Click the heart icon on any provider card to bookmark your preferred services.</p>
+      <div>
+        <a href="{{ url_for('provider.discovery') }}" class="btn btn-success btn-sm fw-semibold px-3">
+          Browse Nearby Providers
+        </a>
+      </div>
+    </div>
+  {% endif %}
+</div>
+{% endblock %}
