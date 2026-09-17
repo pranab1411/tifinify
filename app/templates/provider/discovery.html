@@ -13,12 +13,12 @@
           <a href="{{ url_for('provider.discovery') }}" class="text-decoration-none small text-muted">Reset</a>
         </div>
 
-        <form action="{{ url_for('provider.discovery') }}" method="GET" id="filterForm">
+        <form action="{{ url_for('provider.discovery') }}" method="GET" id="filterForm" onsubmit="const loc = (document.getElementById('filterLocation').value || '').toLowerCase(); if (!loc.includes('current') && !loc.includes('gps')) { const hLat = document.getElementById('hiddenLat'); const hLng = document.getElementById('hiddenLng'); if (hLat) hLat.disabled = true; if (hLng) hLng.disabled = true; }">
           <!-- Locality & Coordinates -->
           <div class="mb-3">
             <label class="form-label small fw-bold text-muted">Location / Area</label>
             <div class="input-group input-group-sm">
-              <input type="text" name="location" id="filterLocation" class="form-control" value="{{ location_query }}" placeholder="Area or locality" oninput="if (!this.value.toLowerCase().includes('current') && !this.value.toLowerCase().includes('gps')) { document.getElementById('hiddenLat').value=''; document.getElementById('hiddenLng').value=''; }">
+              <input type="text" name="location" id="filterLocation" class="form-control" value="{{ location_query }}" placeholder="Area or locality">
               <button type="button" class="btn btn-outline-secondary btn-use-location" title="Current Location">
                 <i class="bi bi-crosshair"></i>
               </button>
@@ -270,7 +270,7 @@
         <div id="googleSyncStatus" class="alert d-none small mb-3" role="alert"></div>
 
         <button type="button" class="btn btn-success w-100 py-2 fw-semibold mb-3 shadow-sm" id="btnTriggerGoogleSync">
-          <i class="bi bi-cloud-arrow-down-fill me-1"></i> Fetch Real Places for {{ location_query }} Now
+          <i class="bi bi-stars me-1"></i> Discover Real Places for {{ location_query }} with Gemini AI
         </button>
 
         <!-- Optional Accordion for Advanced Google Maps Key -->

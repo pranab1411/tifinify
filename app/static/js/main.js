@@ -469,28 +469,37 @@ function initGoogleSyncModal() {
     syncBtn.addEventListener("click", async () => {
       const originalText = syncBtn.innerHTML;
       const statusDiv = document.getElementById("googleSyncStatus");
-      const hiddenLat = document.getElementById("hiddenLat") ? document.getElementById("hiddenLat").value : null;
-      const hiddenLng = document.getElementById("hiddenLng") ? document.getElementById("hiddenLng").value : null;
       const filterLocation = document.getElementById("filterLocation") ? document.getElementById("filterLocation").value : "";
       const customKey = keyInput ? keyInput.value.trim() : "";
 
+      const urlParams = new URLSearchParams(window.location.search);
+      const lat = urlParams.get("lat") || sessionStorage.getItem("user_lat") || "23.1815";
+      const lng = urlParams.get("lng") || sessionStorage.getItem("user_lng") || "79.9864";
+      const locationName = filterLocation || urlParams.get("location") || "Local Area";
+
       syncBtn.disabled = true;
-      syncBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Fetching Real Places...';
+      syncBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Discovering with Gemini AI...';
       if (statusDiv) {
         statusDiv.classList.remove("d-none", "alert-danger", "alert-success");
         statusDiv.classList.add("alert-info");
-        statusDiv.innerHTML = '<i class="bi bi-arrow-repeat spin me-2"></i> Querying Google Places API and computing AI Trust Scores...';
+        statusDiv.innerHTML = '<i class="bi bi-arrow-repeat spin me-2"></i> Querying Gemini AI Place Intelligence and computing AI Trust Scores...';
       }
 
       try {
-        const payload = {
-          lat: hiddenLat || null,
-          lng: hiddenLng || null,
-          query: filterLocation || "",
-          api_key: customKey || null,
+        let endpoint = "/api/v1/sync/gemini-places";
+        let payload = {
+          lat: parseFloat(lat),
+          lng: parseFloat(lng),
+          location_name: locationName,
+          count: 5,
         };
 
-        const res = await fetch("/api/v1/sync/google-places", {
+        if (customKey && customKey.length > 10) {
+          endpoint = "/api/v1/sync/google-places";
+          payload = { lat: parseFloat(lat), lng: parseFloat(lng), query: locationName, api_key: customKey };
+        }
+
+        const res = await fetch(endpoint, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(payload),
@@ -501,16 +510,16 @@ function initGoogleSyncModal() {
           if (statusDiv) {
             statusDiv.classList.remove("alert-info");
             statusDiv.classList.add("alert-success");
-            statusDiv.innerHTML = `<i class="bi bi-check-circle-fill me-2"></i> ${result.message} Reloading discovery...`;
+            statusDiv.innerHTML = `<i class="bi bi-check-circle-fill me-2"></i> ${result.message || "Places discovered successfully!"} Reloading...`;
           }
           setTimeout(() => {
             window.location.reload();
-          }, 1200);
+          }, 900);
         } else {
           if (statusDiv) {
             statusDiv.classList.remove("alert-info");
             statusDiv.classList.add("alert-danger");
-            statusDiv.innerHTML = `<i class="bi bi-exclamation-triangle-fill me-2"></i> ${result.message}`;
+            statusDiv.innerHTML = `<i class="bi bi-exclamation-triangle-fill me-2"></i> ${result.message || "Discovery failed."}`;
           }
           syncBtn.disabled = false;
           syncBtn.innerHTML = originalText;
@@ -519,32 +528,36 @@ function initGoogleSyncModal() {
         if (statusDiv) {
           statusDiv.classList.remove("alert-info");
           statusDiv.classList.add("alert-danger");
-          statusDiv.innerHTML = `<i class="bi bi-exclamation-triangle-fill me-2"></i> Failed to communicate with sync endpoint.`;
+          statusDiv.innerHTML = `<i class="bi bi-exclamation-triangle-fill me-2"></i> Failed to communicate with discovery endpoint.`;
         }
         syncBtn.disabled = false;
         syncBtn.innerHTML = originalText;
       }
     });
+  }
+
   const quickSyncBtn = document.getElementById("btnQuickSyncNearby");
   if (quickSyncBtn) {
     quickSyncBtn.addEventListener("click", async () => {
       const originalHtml = quickSyncBtn.innerHTML;
       quickSyncBtn.disabled = true;
-      quickSyncBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Fetching Real Places...';
+      quickSyncBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> AI Discovering...';
 
-      const hiddenLat = document.getElementById("hiddenLat") ? document.getElementById("hiddenLat").value : null;
-      const hiddenLng = document.getElementById("hiddenLng") ? document.getElementById("hiddenLng").value : null;
       const filterLocation = document.getElementById("filterLocation") ? document.getElementById("filterLocation").value : "";
+      const urlParams = new URLSearchParams(window.location.search);
+      const lat = urlParams.get("lat") || sessionStorage.getItem("user_lat") || "23.1815";
+      const lng = urlParams.get("lng") || sessionStorage.getItem("user_lng") || "79.9864";
+      const locationName = filterLocation || urlParams.get("location") || "Local Area";
 
       try {
         const payload = {
-          lat: hiddenLat || null,
-          lng: hiddenLng || null,
-          query: filterLocation || "",
-          demo_verified: true,
+          lat: parseFloat(lat),
+          lng: parseFloat(lng),
+          location_name: locationName,
+          count: 5,
         };
 
-        const res = await fetch("/api/v1/sync/google-places", {
+        const res = await fetch("/api/v1/sync/gemini-places", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(payload),
@@ -552,17 +565,17 @@ function initGoogleSyncModal() {
 
         const result = await res.json();
         if (result.status === "success") {
-          quickSyncBtn.innerHTML = '<i class="bi bi-check2-circle me-1"></i> Places Synced!';
+          quickSyncBtn.innerHTML = '<i class="bi bi-check2-circle me-1"></i> Places Discovered!';
           setTimeout(() => {
             window.location.reload();
-          }, 600);
+          }, 700);
         } else {
-          alert(result.message || "Could not fetch places.");
+          alert(result.message || "Could not discover places.");
           quickSyncBtn.disabled = false;
           quickSyncBtn.innerHTML = originalHtml;
         }
       } catch (err) {
-        alert("Network error while syncing places.");
+        alert("Network error while discovering places.");
         quickSyncBtn.disabled = false;
         quickSyncBtn.innerHTML = originalHtml;
       }

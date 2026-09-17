@@ -40,6 +40,19 @@ INDIAN_CITIES_GEO: Dict[str, Tuple[float, float, str]] = {
     "coimbatore": (11.0168, 76.9558, "Coimbatore, Tamil Nadu"),
     "kochi": (9.9312, 76.2673, "Kochi, Kerala"),
     "visakhapatnam": (17.6868, 83.2185, "Visakhapatnam, Andhra Pradesh"),
+    "jabalpur": (23.1815, 79.9864, "Jabalpur, Madhya Pradesh"),
+    "ranjhi": (23.1900, 80.0100, "Ranjhi, Jabalpur, Madhya Pradesh"),
+    "jec": (23.1928, 79.9880, "JEC, Ranjhi, Jabalpur, Madhya Pradesh"),
+    "jec ranjhi": (23.1928, 79.9880, "JEC Ranjhi, Jabalpur, Madhya Pradesh"),
+    "gwalior": (26.2183, 78.1828, "Gwalior, Madhya Pradesh"),
+    "ujjain": (23.1765, 75.7885, "Ujjain, Madhya Pradesh"),
+    "rewa": (24.5373, 81.3042, "Rewa, Madhya Pradesh"),
+    "sagar": (23.8388, 78.7378, "Sagar, Madhya Pradesh"),
+    "bilaspur": (22.0797, 82.1409, "Bilaspur, Chhattisgarh"),
+    "raipur": (21.2514, 81.6296, "Raipur, Chhattisgarh"),
+    "durg": (21.1904, 81.2849, "Durg, Chhattisgarh"),
+    "bhilai": (21.2121, 81.3733, "Bhilai, Chhattisgarh"),
+    "rourkela": (22.2604, 84.8536, "Rourkela, Odisha"),
     "guwahati": (26.1445, 91.7362, "Guwahati, Assam"),
 }
 
@@ -47,15 +60,49 @@ INDIAN_CITIES_GEO: Dict[str, Tuple[float, float, str]] = {
 def geocode_location(query: str, api_key: Optional[str] = None) -> Optional[Tuple[float, float, str]]:
     """Geocode a location query string into (lat, lng, display_name).
     
-    Tries Google Geocoding API first if an API key is available,
-    then checks fast local dictionary, then queries OpenStreetMap Nominatim API.
+    Checks fast local dictionary first, then Open-Meteo Geocoding API (free, unmetered),
+    then Google Geocoding (if key present), then OpenStreetMap Nominatim.
     """
     if not query or not query.strip():
         return None
 
     cleaned = query.strip().lower()
 
-    # 1. Try Google Geocoding API if key is present
+    # 1. Fast match in local dictionary
+    for city_key, geo_data in INDIAN_CITIES_GEO.items():
+        if city_key == cleaned or city_key in cleaned or cleaned in city_key:
+            return geo_data
+
+    # Check token overlap for academic campuses (e.g. "jec ranjhi" -> jec, ranjhi)
+    tokens = [t.strip() for t in cleaned.replace(",", " ").split() if len(t.strip()) >= 3]
+    for tok in tokens:
+        if tok in INDIAN_CITIES_GEO:
+            return INDIAN_CITIES_GEO[tok]
+
+    # 2. Query Open-Meteo Geocoding API (100% free, reliable, no API key required)
+    try:
+        search_terms = [query.strip()] + [cleaned.replace("jec", "").strip()] + list(reversed(tokens))
+        for term in search_terms:
+            if not term or len(term) < 3:
+                continue
+            url = "https://geocoding-api.open-meteo.com/v1/search"
+            res = requests.get(url, params={"name": term, "count": 1, "language": "en"}, timeout=3.5)
+            if res.status_code == 200:
+                data = res.json()
+                results = data.get("results")
+                if results and len(results) > 0:
+                    first = results[0]
+                    lat = float(first["latitude"])
+                    lon = float(first["longitude"])
+                    name = first.get("name", term.title())
+                    admin1 = first.get("admin1", "")
+                    country = first.get("country", "India")
+                    display_name = f"{name}, {admin1}, {country}" if admin1 else f"{name}, {country}"
+                    return lat, lon, display_name
+    except Exception as e:
+        logger.warning(f"Open-Meteo geocoding failed for '{query}': {e}")
+
+    # 3. Try Google Geocoding API if key is present
     if not api_key:
         try:
             import os
@@ -71,7 +118,7 @@ def geocode_location(query: str, api_key: Optional[str] = None) -> Optional[Tupl
         try:
             url = "https://maps.googleapis.com/maps/api/geocode/json"
             params = {"address": query.strip(), "key": api_key.strip()}
-            res = requests.get(url, params=params, timeout=5.0)
+            res = requests.get(url, params=params, timeout=4.0)
             if res.status_code == 200:
                 data = res.json()
                 if data.get("status") == "OK" and data.get("results"):
@@ -85,12 +132,7 @@ def geocode_location(query: str, api_key: Optional[str] = None) -> Optional[Tupl
         except Exception as e:
             logger.warning(f"Google Geocoding failed for '{query}': {e}")
 
-    # 2. Check local city dictionary
-    for city_key, geo_data in INDIAN_CITIES_GEO.items():
-        if city_key in cleaned or cleaned in city_key:
-            return geo_data
-
-    # 3. Query OpenStreetMap Nominatim API
+    # 4. Try OpenStreetMap Nominatim API
     try:
         url = "https://nominatim.openstreetmap.org/search"
         params = {
@@ -100,23 +142,22 @@ def geocode_location(query: str, api_key: Optional[str] = None) -> Optional[Tupl
             "addressdetails": 1,
         }
         headers = {
-            "User-Agent": "Tifinify-Academic-MCA-Project/1.0",
+            "User-Agent": "TifinifyApp/2.2 (contact: academic@tifinify.local)",
         }
-        response = requests.get(url, params=params, headers=headers, timeout=4.0)
+        response = requests.get(url, params=params, headers=headers, timeout=3.5)
         if response.status_code == 200:
             data = response.json()
             if data and len(data) > 0:
                 lat = float(data[0]["lat"])
                 lon = float(data[0]["lon"])
                 display_name = data[0].get("display_name", query)
-                # Shorten display name to first 3 tokens
                 short_name = ", ".join(display_name.split(",")[:3]).strip()
                 return lat, lon, short_name
     except Exception as e:
         logger.warning(f"Nominatim geocoding failed for '{query}': {e}")
 
-    # 4. Default fallback if completely unrecognized
-    return 18.5679, 73.9143, query.strip()
+    # 5. Fallback: return default central Indian coordinate if completely unrecognized
+    return 23.1815, 79.9864, query.strip().title()
 
 
 def haversine_distance(lat1: float, lon1: float, lat2: float, lon2: float) -> float:

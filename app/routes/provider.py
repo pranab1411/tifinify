@@ -24,28 +24,32 @@ def discovery():
     user_lat = None
     user_lon = None
 
-    # 1. If explicit GPS coordinates are provided in query params
-    if lat_str and lon_str and lat_str.strip() and lon_str.strip():
-        try:
-            user_lat = float(lat_str)
-            user_lon = float(lon_str)
-            loc_query = loc_query or "Current Location (GPS)"
-        except ValueError:
-            pass
+    # Detect if user requested GPS/device coordinates
+    is_gps_request = loc_query and any(k in loc_query.lower() for k in ("current location", "gps", "my location"))
 
-    # 2. If user requested "Current Location" or "GPS" without coordinates, check session coordinates
-    if (user_lat is None or user_lon is None) and loc_query and any(k in loc_query.lower() for k in ("current location", "gps", "my location")):
-        user_lat = session.get("user_lat")
-        user_lon = session.get("user_lon")
-        if user_lat is not None and user_lon is not None:
-            loc_query = session.get("user_location") or "Current Location (GPS)"
-
-    # 3. If user typed a specific locality / city name
-    if (user_lat is None or user_lon is None) and loc_query and not any(k in loc_query.lower() for k in ("current location", "gps", "my location")):
+    # 1. If user typed a specific locality or city name (not GPS), ALWAYS geocode the typed location!
+    if loc_query and not is_gps_request:
         geo_result = geocode_location(loc_query)
         if geo_result:
             user_lat, user_lon, resolved_name = geo_result
             loc_query = resolved_name
+
+    # 2. If it's a GPS request or locality geocoding didn't run, check explicit coordinates in query params
+    if (user_lat is None or user_lon is None) and lat_str and lon_str and lat_str.strip() and lon_str.strip():
+        try:
+            user_lat = float(lat_str)
+            user_lon = float(lon_str)
+            if not loc_query:
+                loc_query = "Current Location (GPS)"
+        except ValueError:
+            pass
+
+    # 3. If user requested "Current Location" without coordinates, check session coordinates
+    if (user_lat is None or user_lon is None) and is_gps_request:
+        user_lat = session.get("user_lat")
+        user_lon = session.get("user_lon")
+        if user_lat is not None and user_lon is not None:
+            loc_query = session.get("user_location") or "Current Location (GPS)"
 
     # 4. Fallback to existing session if no coordinates yet
     if user_lat is None or user_lon is None:
@@ -55,9 +59,9 @@ def discovery():
 
     # 5. Default baseline fallback if completely unset
     if user_lat is None or user_lon is None:
-        user_lat = 18.5679
-        user_lon = 73.9143
-        loc_query = "Viman Nagar, Pune"
+        user_lat = 23.1815
+        user_lon = 79.9864
+        loc_query = "Jabalpur, Madhya Pradesh"
 
     # Persist in session so subsequent page visits remember the user's location
     session["user_lat"] = user_lat
