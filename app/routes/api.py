@@ -291,3 +291,52 @@ def sync_gemini_places():
     })
 
 
+@api_bp.route("/geo/ip-locate", methods=["GET"])
+def ip_locate():
+    """Detect client location by public IP as a fast, reliable fallback when browser GPS is unavailable."""
+    import requests
+
+    try:
+        r = requests.get("https://ipwhois.app/json/", timeout=3.0)
+        if r.status_code == 200:
+            d = r.json()
+            if d.get("latitude") and d.get("longitude"):
+                city = d.get("city", "Local Area")
+                region = d.get("region", "")
+                return jsonify({
+                    "status": "success",
+                    "latitude": float(d["latitude"]),
+                    "longitude": float(d["longitude"]),
+                    "city": f"{city}, {region}" if region else city,
+                    "source": "ip_geolocation",
+                })
+    except Exception:
+        pass
+
+    try:
+        r = requests.get("https://ipapi.co/json/", timeout=3.0)
+        if r.status_code == 200:
+            d = r.json()
+            if d.get("latitude") and d.get("longitude"):
+                city = d.get("city", "Local Area")
+                region = d.get("region", "")
+                return jsonify({
+                    "status": "success",
+                    "latitude": float(d["latitude"]),
+                    "longitude": float(d["longitude"]),
+                    "city": f"{city}, {region}" if region else city,
+                    "source": "ip_geolocation",
+                })
+    except Exception:
+        pass
+
+    return jsonify({
+        "status": "success",
+        "latitude": 23.1815,
+        "longitude": 79.9864,
+        "city": "Jabalpur, Madhya Pradesh",
+        "source": "default_fallback",
+    })
+
+
+

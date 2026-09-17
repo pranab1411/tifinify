@@ -19,7 +19,7 @@
             <label class="form-label small fw-bold text-muted">Location / Area</label>
             <div class="input-group input-group-sm">
               <input type="text" name="location" id="filterLocation" class="form-control" value="{{ location_query }}" placeholder="Area or locality">
-              <button type="button" class="btn btn-outline-secondary btn-use-location" title="Current Location">
+              <button type="button" class="btn btn-outline-secondary btn-use-location" id="btnUseLocation" onclick="fetchAndApplyCurrentLocation(this)" title="Detect Current Location" style="cursor: pointer;">
                 <i class="bi bi-crosshair"></i>
               </button>
             </div>

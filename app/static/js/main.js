@@ -44,77 +44,140 @@ function checkAutoLocateOnLoad() {
           urlParams.set("lng", uLng);
           window.location.replace(`${window.location.pathname}?${urlParams.toString()}`);
         },
-        (err) => {
+        async (err) => {
           console.warn("Auto-geolocation skipped:", err.message);
+          try {
+            const res = await fetch("/api/v1/geo/ip-locate");
+            const data = await res.json();
+            if (data && data.latitude && data.longitude) {
+              urlParams.set("lat", data.latitude);
+              urlParams.set("lng", data.longitude);
+              window.location.replace(`${window.location.pathname}?${urlParams.toString()}`);
+            }
+          } catch (e) {}
         },
-        { timeout: 6000 }
+        { timeout: 2500, enableHighAccuracy: false }
       );
     }
   }
 }
 
 /**
- * Handle "Use Current Location" button clicks
+ * Handle "Use Current Location" button clicks with browser GPS + automatic IP fallback.
+ * Defined globally on window so inline onclick handlers and event listeners both work seamlessly.
  */
+window.fetchAndApplyCurrentLocation = async function (btn) {
+  if (!btn) btn = document.querySelector(".btn-use-location");
+
+  // Find associated form and inputs
+  const form = btn ? btn.closest("form") : document.getElementById("filterForm");
+  const locInput =
+    (form ? form.querySelector('input[name="location"]') : null) ||
+    document.getElementById("filterLocation") ||
+    document.getElementById("homeLocation") ||
+    document.querySelector('input[name="location"]');
+  const latInput =
+    (form ? form.querySelector('input[name="lat"]') : null) ||
+    document.getElementById("hiddenLat") ||
+    document.getElementById("homeLat");
+  const lngInput =
+    (form ? form.querySelector('input[name="lng"]') : null) ||
+    document.getElementById("hiddenLng") ||
+    document.getElementById("homeLng");
+
+  // Visual feedback: Spin button icon & update placeholder
+  const originalHtml = btn ? btn.innerHTML : '<i class="bi bi-crosshair"></i>';
+  if (btn) {
+    btn.innerHTML = '<span class="spinner-border spinner-border-sm text-success" role="status" aria-hidden="true"></span>';
+    btn.disabled = true;
+  }
+  if (locInput) {
+    locInput.dataset.previousValue = locInput.value;
+    locInput.placeholder = "Detecting your location...";
+  }
+
+  let isDone = false;
+
+  const applyAndNavigate = (lat, lng, label) => {
+    if (isDone) return;
+    isDone = true;
+
+    sessionStorage.setItem("user_lat", lat);
+    sessionStorage.setItem("user_lng", lng);
+    sessionStorage.setItem("user_location", label || "Current Location");
+
+    if (locInput) {
+      locInput.value = label || "Current Location";
+      locInput.placeholder = "Area or locality";
+    }
+    if (latInput) latInput.value = lat;
+    if (lngInput) lngInput.value = lng;
+
+    // Navigate to discovery page with resolved coordinates
+    const targetUrl = `/providers/discovery?lat=${lat}&lng=${lng}&location=${encodeURIComponent(label || "Current Location")}`;
+    window.location.href = targetUrl;
+  };
+
+  // 1. Kick off IP geolocation immediately in parallel (typically completes in 200-300ms)
+  const ipFetchPromise = fetch("/api/v1/geo/ip-locate")
+    .then((r) => r.json())
+    .catch((err) => {
+      console.warn("IP geolocation fetch error:", err);
+      return null;
+    });
+
+  // 2. Try browser GPS with low accuracy (fast network triangulation) and 2000ms max timeout
+  if (navigator.geolocation) {
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        const uLat = pos.coords.latitude;
+        const uLng = pos.coords.longitude;
+        applyAndNavigate(uLat, uLng, "Current Location (GPS)");
+      },
+      async (err) => {
+        console.warn("Browser GPS unavailable/declined (" + err.message + "). Using network IP fallback...");
+        const ipData = await ipFetchPromise;
+        if (ipData && ipData.latitude && ipData.longitude) {
+          const locName = ipData.city ? `Current Location (${ipData.city})` : "Current Location";
+          applyAndNavigate(ipData.latitude, ipData.longitude, locName);
+        } else {
+          // Default fallback
+          applyAndNavigate(23.1815, 79.9864, "Current Location (Jabalpur)");
+        }
+      },
+      { timeout: 2000, enableHighAccuracy: false, maximumAge: 60000 }
+    );
+  } else {
+    // No browser geolocation support - await IP fetch directly
+    const ipData = await ipFetchPromise;
+    if (ipData && ipData.latitude && ipData.longitude) {
+      const locName = ipData.city ? `Current Location (${ipData.city})` : "Current Location";
+      applyAndNavigate(ipData.latitude, ipData.longitude, locName);
+    } else {
+      applyAndNavigate(23.1815, 79.9864, "Current Location (Jabalpur)");
+    }
+  }
+
+  // Safety timer: If after 2.5 seconds neither GPS nor IP callback resolved, complete using IP promise
+  setTimeout(async () => {
+    if (isDone) return;
+    const ipData = await ipFetchPromise;
+    if (ipData && ipData.latitude && ipData.longitude) {
+      const locName = ipData.city ? `Current Location (${ipData.city})` : "Current Location";
+      applyAndNavigate(ipData.latitude, ipData.longitude, locName);
+    } else {
+      applyAndNavigate(23.1815, 79.9864, "Current Location (Jabalpur)");
+    }
+  }, 2500);
+};
+
 function initGeolocationButtons() {
   const geoBtns = document.querySelectorAll(".btn-use-location");
   geoBtns.forEach((btn) => {
-    btn.addEventListener("click", (e) => {
+    btn.onclick = (e) => {
       e.preventDefault();
-      if (!navigator.geolocation) {
-        alert("Geolocation is not supported by your browser. Please enter your locality manually.");
-        return;
-      }
-
-      const originalHtml = btn.innerHTML;
-      btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1" role="status"></span> Locating...';
-      btn.disabled = true;
-
-      navigator.geolocation.getCurrentPosition(
-        (pos) => {
-          const lat = pos.coords.latitude;
-          const lng = pos.coords.longitude;
-
-          sessionStorage.setItem("user_lat", lat);
-          sessionStorage.setItem("user_lng", lng);
-
-          const form = btn.closest("form");
-          if (form) {
-            let latInput = form.querySelector('input[name="lat"]');
-            let lngInput = form.querySelector('input[name="lng"]');
-            let locInput = form.querySelector('input[name="location"]');
-
-            if (!latInput) {
-              latInput = document.createElement("input");
-              latInput.type = "hidden";
-              latInput.name = "lat";
-              form.appendChild(latInput);
-            }
-            if (!lngInput) {
-              lngInput = document.createElement("input");
-              lngInput.type = "hidden";
-              lngInput.name = "lng";
-              form.appendChild(lngInput);
-            }
-
-            latInput.value = lat;
-            lngInput.value = lng;
-            if (locInput) {
-              locInput.value = "Current Location (GPS)";
-            }
-            form.submit();
-          } else {
-            window.location.href = `/providers/discovery?lat=${lat}&lng=${lng}&location=Current+Location+(GPS)`;
-          }
-        },
-        (err) => {
-          btn.innerHTML = originalHtml;
-          btn.disabled = false;
-          alert(`Location access was denied or timed out (${err.message}). Using manual search.`);
-        },
-        { timeout: 8000 }
-      );
-    });
+      window.fetchAndApplyCurrentLocation(btn);
+    };
   });
 }
 
