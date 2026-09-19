@@ -15,5 +15,8 @@ numpy>=1.26.0
 # HTTP & API Utilities
 requests>=2.31.0
 
+# Production WSGI Server
+gunicorn>=21.2.0
+
 # Testing
 pytest>=8.0.0
