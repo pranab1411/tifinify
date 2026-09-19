@@ -62,32 +62,16 @@ class ProviderService:
                 Provider.latitude.between(min_lat, max_lat),
                 Provider.longitude.between(min_lon, max_lon),
             )
-            # If Google Places API is configured, query and ingest real places
-            try:
-                import os
-                from flask import current_app, session
-                from app.integrations.google_places import GooglePlacesAdapter
-                api_key = None
-                try:
-                    api_key = session.get("google_maps_api_key") or current_app.config.get("GOOGLE_MAPS_API_KEY")
-                except Exception:
-                    pass
-                api_key = api_key or os.environ.get("GOOGLE_MAPS_API_KEY")
-
-                g_adapter = GooglePlacesAdapter(api_key=api_key)
-                if not current_app.config.get("TESTING") and g_adapter.is_configured():
-                    live_places = g_adapter.search_nearby(user_lat, user_lon, radius_meters=int(radius_km * 1000))
-                    for lp in live_places:
-                        g_adapter.ingest_to_database(lp)
-            except Exception:
-                pass
-
             candidate_providers = spatial_query.all()
 
-            # If no providers exist in this location, adaptively seed realistic local providers
+            # If no providers exist in this location, discover real local establishments via Google Search / Gemini / OSM
             if len(candidate_providers) == 0 and location_name:
-                ProviderService.seed_adaptive_providers(user_lat, user_lon, location_name)
-                candidate_providers = spatial_query.all()
+                try:
+                    ProviderService.discover_and_ingest_real_providers(user_lat, user_lon, location_name, radius_km)
+                    candidate_providers = spatial_query.all()
+                except Exception as e:
+                    import logging
+                    logging.getLogger(__name__).warning(f"Real place discovery error: {e}")
         else:
             candidate_providers = query.all()
 
@@ -117,131 +101,51 @@ class ProviderService:
         return results
 
     @staticmethod
+    def discover_and_ingest_real_providers(
+        lat: float,
+        lon: float,
+        location_name: str = "Local Area",
+        radius_km: float = 5.0,
+    ) -> List[Provider]:
+        """Discover actual real tiffin and mess providers using Google Search, Gemini AI, and OpenStreetMap."""
+        import os
+        import logging
+        from flask import current_app, session
+        from app.integrations.gemini_places import GeminiPlacesAdapter
+
+        log = logging.getLogger(__name__)
+        gemini_key = None
+        try:
+            gemini_key = session.get("gemini_api_key") or current_app.config.get("GEMINI_API_KEY")
+        except Exception:
+            pass
+        gemini_key = gemini_key or os.environ.get("GEMINI_API_KEY")
+
+        adapter = GeminiPlacesAdapter(api_key=gemini_key)
+        # discover_places uses Gemini with Google Search if configured,
+        # or falls back to WebSearchPlacesAdapter (live Google/DuckDuckGo/OSM search) without API key
+        real_places = adapter.discover_places(
+            location_name=location_name,
+            lat=lat,
+            lng=lon,
+            count=6,
+        )
+
+        ingested = []
+        for rp in real_places:
+            try:
+                p = adapter.ingest_to_database(rp)
+                if p:
+                    ingested.append(p)
+            except Exception as e:
+                log.warning(f"Error ingesting discovered real place '{rp.get('name')}': {e}")
+
+        return ingested
+
+    @staticmethod
     def seed_adaptive_providers(lat: float, lon: float, location_name: str = "Local Area") -> None:
-        """Seed realistic local providers centered around user's requested coordinates."""
-        from datetime import datetime, timedelta, timezone
-        city_title = location_name.split(",")[0].strip() if location_name else "Local"
-        slug_base = "".join(c for c in city_title.lower() if c.isalnum()) or "loc"
-
-        providers_spec = [
-            {
-                "name": f"{city_title} Homely Tiffin Service",
-                "slug": f"{slug_base}-homely-tiffin",
-                "category": "tiffin",
-                "food_type": "veg",
-                "meal_types": "lunch,dinner",
-                "address": f"Near Main Market, {city_title}",
-                "locality": city_title,
-                "latitude": lat + 0.0035,
-                "longitude": lon + 0.0025,
-                "phone": "+91 98200 44551",
-                "opening_hours": "11:30 AM - 3:30 PM, 7:00 PM - 10:30 PM",
-                "price_per_month": 2500,
-                "price_per_meal": 85,
-                "delivery_available": True,
-                "pickup_available": True,
-                "description": f"Fresh home-cooked pure vegetarian tiffins serving students and professionals in {city_title}.",
-                "reviews": [
-                    ("Ananya Roy", 5.0, "Superb taste and homestyle preparation. Rotis are very soft and dal is healthy.", -15),
-                    ("Siddharth S", 4.5, "Clean packaging and consistent portion sizes. Highly recommended for daily meals.", -10),
-                    ("Pooja M", 4.5, "Dependable daily delivery, always warm and on time.", -3),
-                ]
-            },
-            {
-                "name": f"{city_title} Student Mess & Thali",
-                "slug": f"{slug_base}-student-mess",
-                "category": "mess",
-                "food_type": "both",
-                "meal_types": "lunch,dinner",
-                "address": f"College Road, {city_title}",
-                "locality": city_title,
-                "latitude": lat - 0.0048,
-                "longitude": lon + 0.0038,
-                "phone": "+91 98311 22334",
-                "opening_hours": "12:00 PM - 4:00 PM, 7:30 PM - 11:00 PM",
-                "price_per_month": 2200,
-                "price_per_meal": 80,
-                "delivery_available": True,
-                "pickup_available": True,
-                "description": f"Affordable student dining hall and mess serving vegetarian and egg/chicken thalis.",
-                "reviews": [
-                    ("UserA", 5.0, f"Best tiffin service in {city_title} call now for guaranteed discounts today!", -1),
-                    ("UserB", 5.0, f"Best tiffin service in {city_title} call now for guaranteed discounts today!", -1),
-                    ("Karan D", 2.0, "Food was cold and sabzi was excessively oily. Late delivery.", -8),
-                ]
-            },
-            {
-                "name": f"Maa Annapurna Rasoi ({city_title})",
-                "slug": f"{slug_base}-annapurna-rasoi",
-                "category": "both",
-                "food_type": "jain_available",
-                "meal_types": "lunch,dinner",
-                "address": f"Station Road, {city_title}",
-                "locality": city_title,
-                "latitude": lat + 0.0075,
-                "longitude": lon - 0.0055,
-                "phone": "+91 98455 66778",
-                "opening_hours": "11:00 AM - 3:00 PM, 6:30 PM - 10:00 PM",
-                "price_per_month": 2800,
-                "price_per_meal": 100,
-                "delivery_available": True,
-                "pickup_available": True,
-                "description": f"Satvik pure veg food with Jain options available. Steel tiffin delivery across {city_title}.",
-                "reviews": [
-                    ("Manish Jain", 5.0, "Spotless hygiene and genuine Jain meal preparation without onion or garlic.", -20),
-                    ("Ritu Sen", 4.0, "Good quantity and polite delivery staff. Worth the price.", -12),
-                    ("Nikhil B", 4.5, "Homely taste and very light on stomach.", -4),
-                ]
-            },
-            {
-                "name": f"{city_title} Express Tiffin Hub",
-                "slug": f"{slug_base}-express-tiffin",
-                "category": "tiffin",
-                "food_type": "both",
-                "meal_types": "both",
-                "address": f"Central Sector, {city_title}",
-                "locality": city_title,
-                "latitude": lat - 0.0085,
-                "longitude": lon - 0.0072,
-                "phone": "+91 98765 43210",
-                "opening_hours": "12:00 PM - 3:00 PM, 7:00 PM - 11:00 PM",
-                "price_per_month": 2400,
-                "price_per_meal": 90,
-                "delivery_available": True,
-                "pickup_available": False,
-                "description": f"Doorstep meal box delivery catering to hostellers and working professionals in {city_title}.",
-                "reviews": [
-                    ("Gaurav K", 4.5, "Great value for money and tasty variety every day.", -14),
-                    ("Swati P", 4.0, "Neat packaging and generous rice and roti portions.", -7),
-                ]
-            }
-        ]
-
-        now = datetime.now(timezone.utc)
-        for p_info in providers_spec:
-            reviews = p_info.pop("reviews")
-            existing = Provider.query.filter_by(slug=p_info["slug"]).first()
-            if existing:
-                continue
-
-            provider = Provider(
-                **p_info,
-                is_demo=True,
-                is_active=True,
-            )
-            db.session.add(provider)
-            db.session.commit()
-
-            for r_name, r_rating, r_text, days_offset in reviews:
-                r_date = now + timedelta(days=days_offset)
-                ReviewService.add_review(
-                    provider_id=provider.id,
-                    rating=r_rating,
-                    review_text=r_text,
-                    reviewer_name=r_name,
-                    source="demo",
-                    review_date=r_date,
-                )
+        """Backwards-compatible bridge that invokes discover_and_ingest_real_providers."""
+        ProviderService.discover_and_ingest_real_providers(lat=lat, lon=lon, location_name=location_name)
 
     @staticmethod
     def get_provider_details(provider_id: int) -> Optional[Dict[str, Any]]:

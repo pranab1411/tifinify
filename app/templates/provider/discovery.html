@@ -121,11 +121,15 @@
           <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 d-none d-md-inline">
             <i class="bi bi-geo-alt-fill me-1"></i> OpenMaps Active
           </span>
-          <button type="button" class="btn btn-success btn-sm fw-semibold shadow-sm d-flex align-items-center gap-1" id="btnGeminiDiscover">
-            <i class="bi bi-stars"></i>
-            <span>AI Discover with Gemini</span>
+          <button type="button" class="btn btn-outline-success btn-sm fw-semibold shadow-sm d-flex align-items-center gap-1" id="btnWebSearchDiscover" title="Search Google & Web directory for real places">
+            <i class="bi bi-search"></i>
+            <span>Google / Web Search</span>
           </button>
-          <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-toggle="modal" data-bs-target="#googleSyncModal" title="Map & Sync Settings">
+          <button type="button" class="btn btn-success btn-sm fw-semibold shadow-sm d-flex align-items-center gap-1" id="btnGeminiDiscover" title="Discover places with Gemini AI">
+            <i class="bi bi-stars"></i>
+            <span>AI Discover (Gemini)</span>
+          </button>
+          <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-toggle="modal" data-bs-target="#googleSyncModal" title="Discovery & API Key Settings">
             <i class="bi bi-gear"></i>
           </button>
         </div>
@@ -228,16 +232,16 @@
           {% endfor %}
         </div>
       {% else %}
-        <!-- Empty State -->
-        <div class="card border-0 shadow-sm rounded-4 p-5 text-center bg-white my-4">
-          <span class="fs-1 text-muted mb-2">🍽</span>
-          <h4 class="fw-bold">No providers found in this radius</h4>
+        <!-- Zero Results Fallback with Quick Search -->
+        <div class="card border-0 shadow-sm rounded-4 p-5 text-center bg-white">
+          <div class="display-6 text-muted mb-3"><i class="bi bi-geo"></i></div>
+          <h5 class="fw-bold mb-2">No providers found in this immediate radius</h5>
           <p class="text-muted small mb-4">
-            Try discovering authentic local mess & tiffin providers with Gemini AI, or expand your search radius.
+            Discover real tiffin and mess providers in <strong>{{ location_query }}</strong> using Google & Web Search or Gemini AI.
           </p>
-          <div class="d-flex justify-content-center gap-2 flex-wrap">
+          <div class="d-flex justify-content-center gap-2">
             <button type="button" class="btn btn-success btn-sm fw-semibold btn-gemini-discover">
-              <i class="bi bi-stars me-1"></i> Discover Places with Gemini AI
+              <i class="bi bi-search me-1"></i> Search Real Places Now
             </button>
             <a href="{{ url_for('provider.discovery', radius=10) }}" class="btn btn-outline-success btn-sm fw-semibold">
               Expand to 10 km Radius
@@ -249,49 +253,54 @@
   </div>
 </div>
 
-<!-- Modal for Real Places Sync & Optional API Key Configuration -->
+<!-- Modal for Real Places Discovery & Optional Key Configuration -->
 <div class="modal fade" id="googleSyncModal" tabindex="-1" aria-labelledby="googleSyncModalLabel" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content rounded-4 border-0 shadow">
       <div class="modal-header border-bottom pb-3">
         <h5 class="modal-title fw-bold" id="googleSyncModalLabel">
-          <i class="bi bi-geo-alt-fill text-success me-2"></i> Discover Real Nearby Places
+          <i class="bi bi-stars text-success me-2"></i> Discover Real Nearby Places
         </h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body py-3">
         <div class="alert alert-success bg-success bg-opacity-10 border-success border-opacity-25 text-dark small mb-3">
           <i class="bi bi-check-circle-fill text-success me-1"></i>
-          <strong>No API key required!</strong> Tifinify automatically discovers real verified tiffin & mess services for
-          <strong>{{ location_query }}</strong> and analyzes customer reviews with our explainable AI Trust Engine.
+          <strong>No API key required!</strong> Tifinify searches live Google / Web listings and OpenMaps for real tiffin & mess services in
+          <strong>{{ location_query }}</strong> and analyzes reviews with our explainable AI Trust Engine.
         </div>
 
         <!-- Dynamic Status Alert -->
         <div id="googleSyncStatus" class="alert d-none small mb-3" role="alert"></div>
 
-        <button type="button" class="btn btn-success w-100 py-2 fw-semibold mb-3 shadow-sm" id="btnTriggerGoogleSync">
-          <i class="bi bi-stars me-1"></i> Discover Real Places for {{ location_query }} with Gemini AI
-        </button>
+        <div class="d-grid gap-2 mb-3">
+          <button type="button" class="btn btn-success py-2 fw-semibold shadow-sm" id="btnTriggerWebSync">
+            <i class="bi bi-search me-1"></i> Find Real Places via Google & Web Search (Free)
+          </button>
+          <button type="button" class="btn btn-outline-success py-2 fw-semibold" id="btnTriggerGoogleSync">
+            <i class="bi bi-stars me-1"></i> Discover with Gemini AI (Google Grounded)
+          </button>
+        </div>
 
-        <!-- Optional Accordion for Advanced Google Maps Key -->
-        <div class="accordion" id="advancedKeyAccordion">
+        <!-- Optional Gemini Key Accordion -->
+        <div class="accordion mb-2" id="geminiKeyAccordion">
           <div class="accordion-item border rounded-3 overflow-hidden">
-            <h2 class="accordion-header" id="headingKey">
-              <button class="accordion-button collapsed py-2 small fw-bold bg-light text-muted" type="button" data-bs-toggle="collapse" data-bs-target="#collapseKey" aria-expanded="false" aria-controls="collapseKey">
-                <i class="bi bi-key me-2"></i> Advanced: Google Cloud API Key (Optional)
+            <h2 class="accordion-header" id="headingGeminiKey">
+              <button class="accordion-button collapsed py-2 small fw-bold bg-light text-muted" type="button" data-bs-toggle="collapse" data-bs-target="#collapseGeminiKey" aria-expanded="false" aria-controls="collapseGeminiKey">
+                <i class="bi bi-key me-2"></i> Free Gemini API Key (Optional)
               </button>
             </h2>
-            <div id="collapseKey" class="accordion-collapse collapse" aria-labelledby="headingKey" data-bs-parent="#advancedKeyAccordion">
+            <div id="collapseGeminiKey" class="accordion-collapse collapse" aria-labelledby="headingGeminiKey" data-bs-parent="#geminiKeyAccordion">
               <div class="accordion-body p-3 small text-muted">
                 <p class="mb-2">
-                  An API key is <strong>strictly optional</strong>. If you have a billing-enabled Google Cloud account and wish to use Google Maps satellite tiles or live Google Places worldwide:
+                  Get a 100% free API key from <a href="https://aistudio.google.com/" target="_blank" class="text-decoration-none">Google AI Studio</a> to enable Gemini Google Grounded place discovery:
                 </p>
                 <div class="input-group input-group-sm mb-2">
-                  <input type="password" id="inputGoogleApiKey" class="form-control" placeholder="AIzaSy..." value="{{ google_maps_api_key or '' }}">
-                  <button class="btn btn-outline-secondary" type="button" id="btnSaveGoogleKey">Save</button>
+                  <input type="password" id="inputGeminiApiKey" class="form-control" placeholder="AIzaSy...">
+                  <button class="btn btn-success" type="button" id="btnSaveGeminiKey">Save Key</button>
                 </div>
                 <div class="form-text text-muted" style="font-size: 0.75rem;">
-                  Leave empty if you do not have an API key. Tifinify operates 100% free with interactive map tiles.
+                  Optional. If empty, Tifinify automatically uses live Google Search and OpenMaps for 100% free place discovery.
                 </div>
               </div>
             </div>

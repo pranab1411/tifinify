@@ -433,215 +433,163 @@ window.initGoogleMap = initOpenMap;
 window.initInteractiveMap = initOpenMap;
 
 /**
- * Wire Gemini AI Discovery button to /api/v1/sync/gemini-places
+ * Trigger Real Places Discovery via Google Web Search or Gemini AI
  */
+async function triggerPlaceDiscovery(buttonEl, mode = "auto") {
+  const originalHtml = buttonEl ? buttonEl.innerHTML : "";
+  if (buttonEl) {
+    buttonEl.disabled = true;
+    buttonEl.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Searching...';
+  }
+
+  const statusDiv = document.getElementById("googleSyncStatus");
+  if (statusDiv) {
+    statusDiv.classList.remove("d-none", "alert-danger", "alert-success");
+    statusDiv.classList.add("alert-info");
+    statusDiv.innerHTML = `<i class="bi bi-arrow-repeat spin me-2"></i> Searching live ${mode === "google_web" ? "Google / Web Search" : "Google & Gemini AI"} for real establishments...`;
+  }
+
+  const filterLocation = document.getElementById("filterLocation") ? document.getElementById("filterLocation").value : "";
+  const hiddenLat = document.getElementById("hiddenLat") ? document.getElementById("hiddenLat").value : "";
+  const hiddenLng = document.getElementById("hiddenLng") ? document.getElementById("hiddenLng").value : "";
+
+  const urlParams = new URLSearchParams(window.location.search);
+  const lat = hiddenLat || urlParams.get("lat") || sessionStorage.getItem("user_lat") || "23.1815";
+  const lng = hiddenLng || urlParams.get("lng") || sessionStorage.getItem("user_lng") || "79.9864";
+  const locationName = filterLocation || urlParams.get("location") || "Local Area";
+
+  try {
+    const payload = {
+      lat: parseFloat(lat),
+      lng: parseFloat(lng),
+      location_name: locationName,
+      mode: mode,
+      count: 6,
+    };
+
+    const res = await fetch("/api/v1/sync/real-places", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+
+    const result = await res.json();
+    if (result.status === "success") {
+      if (buttonEl) {
+        buttonEl.innerHTML = `<i class="bi bi-check2-circle me-1"></i> ${result.count || 0} Real Places Found!`;
+      }
+      if (statusDiv) {
+        statusDiv.classList.remove("alert-info");
+        statusDiv.classList.add("alert-success");
+        statusDiv.innerHTML = `<i class="bi bi-check-circle-fill me-2"></i> ${result.message} Reloading...`;
+      }
+      setTimeout(() => {
+        window.location.reload();
+      }, 900);
+    } else {
+      if (statusDiv) {
+        statusDiv.classList.remove("alert-info");
+        statusDiv.classList.add("alert-danger");
+        statusDiv.innerHTML = `<i class="bi bi-exclamation-triangle-fill me-2"></i> ${result.message || "Discovery failed."}`;
+      }
+      alert(result.message || "Could not discover places.");
+      if (buttonEl) {
+        buttonEl.disabled = false;
+        buttonEl.innerHTML = originalHtml;
+      }
+    }
+  } catch (err) {
+    console.error("Discovery error:", err);
+    if (statusDiv) {
+      statusDiv.classList.remove("alert-info");
+      statusDiv.classList.add("alert-danger");
+      statusDiv.innerHTML = `<i class="bi bi-exclamation-triangle-fill me-2"></i> Network error connecting to discovery engine.`;
+    }
+    alert("Network error connecting to place discovery.");
+    if (buttonEl) {
+      buttonEl.disabled = false;
+      buttonEl.innerHTML = originalHtml;
+    }
+  }
+}
+
 function initGeminiDiscoveryUI() {
   const geminiBtns = document.querySelectorAll("#btnGeminiDiscover, .btn-gemini-discover");
-  if (!geminiBtns || geminiBtns.length === 0) return;
-
   geminiBtns.forEach((btn) => {
-    btn.addEventListener("click", async () => {
-      const originalHtml = btn.innerHTML;
-      btn.disabled = true;
-      btn.innerHTML = `<span class="spinner-border spinner-border-sm me-1" role="status"></span> Scanning with Gemini AI...`;
-
-      const hiddenLat = document.getElementById("hiddenLat") ? document.getElementById("hiddenLat").value : null;
-      const hiddenLng = document.getElementById("hiddenLng") ? document.getElementById("hiddenLng").value : null;
-      const filterLocation = document.getElementById("filterLocation") ? document.getElementById("filterLocation").value : "";
-
-      const urlParams = new URLSearchParams(window.location.search);
-      const lat = hiddenLat || urlParams.get("lat") || sessionStorage.getItem("user_lat") || "28.6139";
-      const lng = hiddenLng || urlParams.get("lng") || sessionStorage.getItem("user_lng") || "77.2090";
-      const locationName = filterLocation || urlParams.get("location") || "Current Location";
-
-      try {
-        const payload = {
-          lat: parseFloat(lat),
-          lng: parseFloat(lng),
-          location_name: locationName,
-          count: 5,
-        };
-
-        const res = await fetch("/api/v1/sync/gemini-places", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(payload),
-        });
-
-        const result = await res.json();
-        if (result.status === "success") {
-          btn.classList.remove("btn-success");
-          btn.classList.add("btn-outline-success");
-          btn.innerHTML = `<i class="bi bi-check2-circle me-1"></i> ${result.count || 5} Places Discovered!`;
-
-          setTimeout(() => {
-            window.location.reload();
-          }, 800);
-        } else {
-          alert(result.message || "Could not discover places with Gemini.");
-          btn.disabled = false;
-          btn.innerHTML = originalHtml;
-        }
-      } catch (err) {
-        console.error("Gemini discovery error:", err);
-        alert("Network error while connecting to Gemini place discovery.");
-        btn.disabled = false;
-        btn.innerHTML = originalHtml;
-      }
-    });
+    btn.onclick = (e) => {
+      e.preventDefault();
+      triggerPlaceDiscovery(btn, "gemini");
+    };
   });
+
+  const webSearchBtn = document.getElementById("btnWebSearchDiscover");
+  if (webSearchBtn) {
+    webSearchBtn.onclick = (e) => {
+      e.preventDefault();
+      triggerPlaceDiscovery(webSearchBtn, "google_web");
+    };
+  }
 }
 
 /**
- * Handle Google Places Sync Modal & live ingestion
+ * Handle Real Places Sync Modal & live ingestion
  */
 function initGoogleSyncModal() {
-  const syncBtn = document.getElementById("btnTriggerGoogleSync");
-  const saveKeyBtn = document.getElementById("btnSaveGoogleKey");
-  const keyInput = document.getElementById("inputGoogleApiKey");
+  const syncGeminiBtn = document.getElementById("btnTriggerGoogleSync");
+  const syncWebBtn = document.getElementById("btnTriggerWebSync");
+  const saveGeminiKeyBtn = document.getElementById("btnSaveGeminiKey");
+  const geminiKeyInput = document.getElementById("inputGeminiApiKey");
 
-  if (saveKeyBtn && keyInput) {
-    saveKeyBtn.addEventListener("click", async () => {
-      const key = keyInput.value.trim();
-      saveKeyBtn.disabled = true;
-      saveKeyBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Saving...';
+  // Load existing Gemini key status
+  if (geminiKeyInput) {
+    fetch("/api/v1/config/gemini-key")
+      .then((r) => r.json())
+      .then((data) => {
+        if (data && data.configured && data.masked_key) {
+          geminiKeyInput.placeholder = `Active Key: ${data.masked_key}`;
+        }
+      })
+      .catch(() => {});
+  }
+
+  if (saveGeminiKeyBtn && geminiKeyInput) {
+    saveGeminiKeyBtn.addEventListener("click", async () => {
+      const key = geminiKeyInput.value.trim();
+      saveGeminiKeyBtn.disabled = true;
+      saveGeminiKeyBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Saving...';
 
       try {
-        const res = await fetch("/api/v1/config/google-maps-key", {
+        const res = await fetch("/api/v1/config/gemini-key", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ api_key: key }),
         });
         const data = await res.json();
         if (data.status === "success") {
+          alert(data.message || "Gemini API Key saved successfully!");
           window.location.reload();
         } else {
-          alert(data.message || "Failed to save API key.");
-          saveKeyBtn.disabled = false;
-          saveKeyBtn.innerHTML = "Save Key";
+          alert(data.message || "Failed to save Gemini API key.");
+          saveGeminiKeyBtn.disabled = false;
+          saveGeminiKeyBtn.innerHTML = "Save Key";
         }
       } catch (err) {
-        alert("Network error while saving API key.");
-        saveKeyBtn.disabled = false;
-        saveKeyBtn.innerHTML = "Save Key";
+        alert("Network error while saving Gemini key.");
+        saveGeminiKeyBtn.disabled = false;
+        saveGeminiKeyBtn.innerHTML = "Save Key";
       }
     });
   }
 
-  if (syncBtn) {
-    syncBtn.addEventListener("click", async () => {
-      const originalText = syncBtn.innerHTML;
-      const statusDiv = document.getElementById("googleSyncStatus");
-      const filterLocation = document.getElementById("filterLocation") ? document.getElementById("filterLocation").value : "";
-      const customKey = keyInput ? keyInput.value.trim() : "";
-
-      const urlParams = new URLSearchParams(window.location.search);
-      const lat = urlParams.get("lat") || sessionStorage.getItem("user_lat") || "23.1815";
-      const lng = urlParams.get("lng") || sessionStorage.getItem("user_lng") || "79.9864";
-      const locationName = filterLocation || urlParams.get("location") || "Local Area";
-
-      syncBtn.disabled = true;
-      syncBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Discovering with Gemini AI...';
-      if (statusDiv) {
-        statusDiv.classList.remove("d-none", "alert-danger", "alert-success");
-        statusDiv.classList.add("alert-info");
-        statusDiv.innerHTML = '<i class="bi bi-arrow-repeat spin me-2"></i> Querying Gemini AI Place Intelligence and computing AI Trust Scores...';
-      }
-
-      try {
-        let endpoint = "/api/v1/sync/gemini-places";
-        let payload = {
-          lat: parseFloat(lat),
-          lng: parseFloat(lng),
-          location_name: locationName,
-          count: 5,
-        };
-
-        if (customKey && customKey.length > 10) {
-          endpoint = "/api/v1/sync/google-places";
-          payload = { lat: parseFloat(lat), lng: parseFloat(lng), query: locationName, api_key: customKey };
-        }
-
-        const res = await fetch(endpoint, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(payload),
-        });
-
-        const result = await res.json();
-        if (result.status === "success") {
-          if (statusDiv) {
-            statusDiv.classList.remove("alert-info");
-            statusDiv.classList.add("alert-success");
-            statusDiv.innerHTML = `<i class="bi bi-check-circle-fill me-2"></i> ${result.message || "Places discovered successfully!"} Reloading...`;
-          }
-          setTimeout(() => {
-            window.location.reload();
-          }, 900);
-        } else {
-          if (statusDiv) {
-            statusDiv.classList.remove("alert-info");
-            statusDiv.classList.add("alert-danger");
-            statusDiv.innerHTML = `<i class="bi bi-exclamation-triangle-fill me-2"></i> ${result.message || "Discovery failed."}`;
-          }
-          syncBtn.disabled = false;
-          syncBtn.innerHTML = originalText;
-        }
-      } catch (err) {
-        if (statusDiv) {
-          statusDiv.classList.remove("alert-info");
-          statusDiv.classList.add("alert-danger");
-          statusDiv.innerHTML = `<i class="bi bi-exclamation-triangle-fill me-2"></i> Failed to communicate with discovery endpoint.`;
-        }
-        syncBtn.disabled = false;
-        syncBtn.innerHTML = originalText;
-      }
+  if (syncWebBtn) {
+    syncWebBtn.addEventListener("click", () => {
+      triggerPlaceDiscovery(syncWebBtn, "google_web");
     });
   }
 
-  const quickSyncBtn = document.getElementById("btnQuickSyncNearby");
-  if (quickSyncBtn) {
-    quickSyncBtn.addEventListener("click", async () => {
-      const originalHtml = quickSyncBtn.innerHTML;
-      quickSyncBtn.disabled = true;
-      quickSyncBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> AI Discovering...';
-
-      const filterLocation = document.getElementById("filterLocation") ? document.getElementById("filterLocation").value : "";
-      const urlParams = new URLSearchParams(window.location.search);
-      const lat = urlParams.get("lat") || sessionStorage.getItem("user_lat") || "23.1815";
-      const lng = urlParams.get("lng") || sessionStorage.getItem("user_lng") || "79.9864";
-      const locationName = filterLocation || urlParams.get("location") || "Local Area";
-
-      try {
-        const payload = {
-          lat: parseFloat(lat),
-          lng: parseFloat(lng),
-          location_name: locationName,
-          count: 5,
-        };
-
-        const res = await fetch("/api/v1/sync/gemini-places", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(payload),
-        });
-
-        const result = await res.json();
-        if (result.status === "success") {
-          quickSyncBtn.innerHTML = '<i class="bi bi-check2-circle me-1"></i> Places Discovered!';
-          setTimeout(() => {
-            window.location.reload();
-          }, 700);
-        } else {
-          alert(result.message || "Could not discover places.");
-          quickSyncBtn.disabled = false;
-          quickSyncBtn.innerHTML = originalHtml;
-        }
-      } catch (err) {
-        alert("Network error while discovering places.");
-        quickSyncBtn.disabled = false;
-        quickSyncBtn.innerHTML = originalHtml;
-      }
+  if (syncGeminiBtn) {
+    syncGeminiBtn.addEventListener("click", () => {
+      triggerPlaceDiscovery(syncGeminiBtn, "gemini");
     });
   }
 }

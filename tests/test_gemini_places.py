@@ -81,3 +81,77 @@ def test_gemini_places_sync_missing_params(client, app):
     assert res.status_code == 400
     data = res.get_json()
     assert data["status"] == "error"
+
+
+def test_web_search_places_adapter_and_sync(client, app):
+    from app.integrations.web_search_places import WebSearchPlacesAdapter
+    with app.app_context():
+        adapter = WebSearchPlacesAdapter()
+        sample_place = {
+            "name": "Shree Ram Mess & Tiffin Service",
+            "category": "mess",
+            "food_type": "veg",
+            "address": "Opposite Engineering College, Ranjhi",
+            "locality": "Ranjhi",
+            "city": "Jabalpur",
+            "latitude": 23.1815,
+            "longitude": 79.9864,
+            "phone": "+91 98260 11223",
+            "price_per_month": 2400,
+            "price_per_meal": 80,
+            "reviews": [
+                {
+                    "reviewer_name": "Rohan Patel",
+                    "rating": 4.5,
+                    "text": "Tasty hot rotis and very hygienic packaging. Great for students.",
+                },
+                {
+                    "reviewer_name": "Pooja Verma",
+                    "rating": 5.0,
+                    "text": "Affordable monthly mess service with authentic home taste.",
+                },
+            ],
+        }
+        
+        provider = adapter.ingest_to_database(sample_place)
+        assert provider is not None
+        assert provider.id is not None
+        assert provider.review_trust_score > 0
+        assert provider.name == "Shree Ram Mess & Tiffin Service"
+
+    # Test POST /api/v1/sync/real-places
+    res = client.post(
+        "/api/v1/sync/real-places",
+        json={
+            "lat": 23.1815,
+            "lng": 79.9864,
+            "location_name": "JEC Ranjhi, Jabalpur",
+            "mode": "google_web",
+            "count": 2,
+        },
+    )
+    assert res.status_code == 200
+    data = res.get_json()
+    assert data["status"] == "success"
+    assert "count" in data
+
+
+def test_gemini_key_config_api(client, app):
+    # GET key config
+    res_get = client.get("/api/v1/config/gemini-key")
+    assert res_get.status_code == 200
+    data_get = res_get.get_json()
+    assert data_get["status"] == "success"
+    assert "configured" in data_get
+
+    # POST invalid short key (< 10 chars) returns 400
+    res_short = client.post("/api/v1/config/gemini-key", json={"api_key": "short"})
+    assert res_short.status_code == 400
+    assert res_short.get_json()["status"] == "error"
+
+    # POST clearing key ("") returns 200 with configured: False
+    res_clear = client.post("/api/v1/config/gemini-key", json={"api_key": ""})
+    assert res_clear.status_code == 200
+    assert res_clear.get_json()["configured"] is False
+
+

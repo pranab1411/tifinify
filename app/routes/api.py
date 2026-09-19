@@ -249,16 +249,90 @@ def sync_google_places():
     })
 
 
+def _update_env_gemini_key(key: str):
+    """Safely persist GEMINI_API_KEY in .env file."""
+    try:
+        from pathlib import Path
+        env_file = Path(__file__).resolve().parent.parent.parent / ".env"
+        if env_file.exists():
+            lines = env_file.read_text(encoding="utf-8").splitlines()
+            new_lines = []
+            found = False
+            for line in lines:
+                if line.startswith("GEMINI_API_KEY="):
+                    new_lines.append(f"GEMINI_API_KEY={key.strip()}")
+                    found = True
+                else:
+                    new_lines.append(line)
+            if not found:
+                new_lines.append(f"GEMINI_API_KEY={key.strip()}")
+            env_file.write_text("\n".join(new_lines) + "\n", encoding="utf-8")
+        else:
+            env_file.write_text(f"GEMINI_API_KEY={key.strip()}\n", encoding="utf-8")
+    except Exception as e:
+        import logging
+        logging.getLogger(__name__).warning(f"Could not persist Gemini key to .env: {e}")
+
+
+@api_bp.route("/config/gemini-key", methods=["GET", "POST"])
+def manage_gemini_key():
+    """Get status of or save Gemini API Key."""
+    from flask import current_app, session
+    import os
+
+    if request.method == "POST":
+        data = request.get_json() or {}
+        key = data.get("api_key", "").strip()
+        if not key:
+            session.pop("gemini_api_key", None)
+            current_app.config["GEMINI_API_KEY"] = ""
+            os.environ["GEMINI_API_KEY"] = ""
+            _update_env_gemini_key("")
+            return jsonify({
+                "status": "success",
+                "message": "Gemini API Key cleared. System will use Google Search / OpenMaps discovery.",
+                "configured": False,
+            })
+
+        if len(key) < 10:
+            return jsonify({"status": "error", "message": "Please provide a valid Gemini API Key from Google AI Studio."}), 400
+
+        session["gemini_api_key"] = key
+        current_app.config["GEMINI_API_KEY"] = key
+        os.environ["GEMINI_API_KEY"] = key
+        _update_env_gemini_key(key)
+
+        return jsonify({
+            "status": "success",
+            "message": "Gemini API Key saved successfully. AI Google Grounded Search is now enabled!",
+            "configured": True,
+        })
+
+    # GET: return status
+    key = session.get("gemini_api_key") or current_app.config.get("GEMINI_API_KEY") or os.environ.get("GEMINI_API_KEY", "")
+    masked = f"{key[:6]}...{key[-4:]}" if len(key) > 10 else ""
+    return jsonify({
+        "status": "success",
+        "configured": bool(key and len(key) > 10),
+        "masked_key": masked,
+    })
+
+
 @api_bp.route("/sync/gemini-places", methods=["POST"])
+@api_bp.route("/sync/real-places", methods=["POST"])
 def sync_gemini_places():
-    """Discover authentic localized tiffin and mess providers using Gemini AI and ingest them."""
+    """Discover authentic localized tiffin and mess providers using Google Search & Gemini AI."""
+    from flask import session, current_app
     from app.integrations.gemini_places import GeminiPlacesAdapter
+    from app.integrations.web_search_places import WebSearchPlacesAdapter
+    import os
 
     data = request.get_json() or {}
     location = data.get("location_name") or data.get("location", "").strip() or "Local Area"
     lat = data.get("lat")
     lng = data.get("lng")
-    count = int(data.get("count", 5))
+    count = int(data.get("count", 6))
+    mode = data.get("mode", "auto")  # "auto", "google_web", "gemini"
 
     try:
         lat_val = float(lat) if lat is not None and str(lat).strip() != "" else None
@@ -269,11 +343,19 @@ def sync_gemini_places():
     if lat_val is None or lng_val is None:
         return jsonify({
             "status": "error",
-            "message": "Both latitude and longitude are required for localized Gemini place discovery.",
+            "message": "Both latitude and longitude are required for localized real place discovery.",
         }), 400
 
-    adapter = GeminiPlacesAdapter()
-    places = adapter.discover_places(location_name=location, lat=lat_val, lng=lng_val, count=count)
+    gemini_key = session.get("gemini_api_key") or current_app.config.get("GEMINI_API_KEY") or os.environ.get("GEMINI_API_KEY")
+    adapter = GeminiPlacesAdapter(api_key=gemini_key)
+
+    if mode == "google_web":
+        web_adapter = WebSearchPlacesAdapter()
+        places = web_adapter.discover_real_places(location_name=location, lat=lat_val, lng=lng_val, count=count)
+        source_label = "Google / Web Search & OpenMaps"
+    else:
+        places = adapter.discover_places(location_name=location, lat=lat_val, lng=lng_val, count=count)
+        source_label = "Gemini AI (Google Grounded)" if adapter.is_configured() else "Google / Web Search & OpenMaps"
 
     ingested = []
     for p_data in places:
@@ -281,14 +363,14 @@ def sync_gemini_places():
         if provider:
             ingested.append(provider.to_dict())
 
-    source_label = "Gemini AI" if adapter.is_configured() else "AI Local Intelligence"
     return jsonify({
         "status": "success",
         "count": len(ingested),
         "source": source_label,
         "data": ingested,
-        "message": f"Successfully discovered and analyzed {len(ingested)} establishment(s) near {location} using {source_label}!",
+        "message": f"Successfully discovered and analyzed {len(ingested)} real establishment(s) near {location} via {source_label}!",
     })
+
 
 
 @api_bp.route("/geo/ip-locate", methods=["GET"])
