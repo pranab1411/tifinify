@@ -3,7 +3,8 @@
 [![Python](https://img.shields.io/badge/Python-3.11%2B-blue.svg)](https://www.python.org/)
 [![Flask](https://img.shields.io/badge/Framework-Flask_3.x-green.svg)](https://flask.palletsprojects.com/)
 [![License](https://img.shields.io/badge/Academic-MCA_Minor_Project-orange.svg)](#)
-[![Tests](https://img.shields.io/badge/Tests-14%2F14%20Passing-brightgreen.svg)](#)
+[![Tests](https://img.shields.io/badge/Tests-22%2F22%20Passing-brightgreen.svg)](#)
+[![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/pranab1411/tifinify)
 
 > **"Find food nearby. Understand the reviews. Choose with confidence."**
 
