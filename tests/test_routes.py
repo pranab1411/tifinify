@@ -80,6 +80,8 @@ def test_landing_page(client):
     assert res.status_code == 200
     assert b"Tifinify" in res.data
     assert b"Find food nearby" in res.data
+    assert b"themeToggleBtn" in res.data
+    assert b"data-bs-theme" in res.data
 
 
 def test_about_page(client):

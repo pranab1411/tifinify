@@ -5,6 +5,7 @@
  */
 
 document.addEventListener("DOMContentLoaded", () => {
+  initThemeUI();
   checkAutoLocateOnLoad();
   initGeolocationButtons();
   initFavoriteToggles();
@@ -229,6 +230,10 @@ function renderSentimentChart(canvasId, positivePct, neutralPct, negativePct) {
   const ctx = document.getElementById(canvasId);
   if (!ctx || typeof Chart === "undefined") return;
 
+  const isDark = document.documentElement.getAttribute("data-bs-theme") === "dark";
+  const textColor = isDark ? "#cbd5e1" : "#475569";
+  const borderColor = isDark ? "#131b2e" : "#ffffff";
+
   new Chart(ctx, {
     type: "doughnut",
     data: {
@@ -238,7 +243,7 @@ function renderSentimentChart(canvasId, positivePct, neutralPct, negativePct) {
           data: [positivePct, neutralPct, negativePct],
           backgroundColor: ["#10B981", "#94A3B8", "#EF4444"],
           borderWidth: 2,
-          borderColor: "#FFFFFF",
+          borderColor: borderColor,
         },
       ],
     },
@@ -248,7 +253,12 @@ function renderSentimentChart(canvasId, positivePct, neutralPct, negativePct) {
       plugins: {
         legend: {
           position: "bottom",
-          labels: { boxWidth: 12, padding: 15, font: { size: 12, weight: 600 } },
+          labels: {
+            boxWidth: 12,
+            padding: 15,
+            color: textColor,
+            font: { size: 12, weight: 600 },
+          },
         },
         tooltip: {
           callbacks: {
@@ -593,3 +603,57 @@ function initGoogleSyncModal() {
     });
   }
 }
+
+/**
+ * Dark / Light Theme Management
+ */
+function getPreferredTheme() {
+  const saved = localStorage.getItem("tifinify_theme");
+  if (saved === "dark" || saved === "light") return saved;
+  return window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+}
+
+function setTheme(theme) {
+  document.documentElement.setAttribute("data-bs-theme", theme);
+  document.documentElement.setAttribute("data-theme", theme);
+  try {
+    localStorage.setItem("tifinify_theme", theme);
+  } catch (e) {}
+  updateThemeIcons(theme);
+}
+
+function toggleTheme() {
+  const current = document.documentElement.getAttribute("data-bs-theme") || "light";
+  const target = current === "dark" ? "light" : "dark";
+  setTheme(target);
+}
+
+function updateThemeIcons(theme) {
+  const moonIcons = document.querySelectorAll(".theme-icon-moon");
+  const sunIcons = document.querySelectorAll(".theme-icon-sun");
+  const toggleBtn = document.getElementById("themeToggleBtn");
+
+  if (theme === "dark") {
+    moonIcons.forEach((el) => el.classList.add("d-none"));
+    sunIcons.forEach((el) => el.classList.remove("d-none"));
+    if (toggleBtn) toggleBtn.setAttribute("title", "Switch to Light Theme");
+  } else {
+    sunIcons.forEach((el) => el.classList.add("d-none"));
+    moonIcons.forEach((el) => el.classList.remove("d-none"));
+    if (toggleBtn) toggleBtn.setAttribute("title", "Switch to Dark Theme");
+  }
+}
+
+function initThemeUI() {
+  const theme = getPreferredTheme();
+  setTheme(theme);
+
+  if (window.matchMedia) {
+    window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", (e) => {
+      if (!localStorage.getItem("tifinify_theme")) {
+        setTheme(e.matches ? "dark" : "light");
+      }
+    });
+  }
+}
+
