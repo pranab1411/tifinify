@@ -1,0 +1,1004 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TIFINIFY - Project Synopsis Report (MCA)</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Crimson+Pro:ital,wght@0,400;0,600;0,700;1,400&family=Inter:wght@400;500;600;700&display=swap');
+
+    @page {
+      size: A4;
+      margin: 22mm 20mm 22mm 20mm;
+      @bottom-right {
+        content: "Page " counter(page);
+        font-family: 'Inter', sans-serif;
+        font-size: 9pt;
+        color: #666;
+      }
+    }
+
+    body {
+      font-family: 'Crimson Pro', Georgia, serif;
+      font-size: 11.5pt;
+      line-height: 1.5;
+      color: #1a1a1a;
+      background: #f8fafc;
+      margin: 0;
+      padding: 0;
+    }
+
+    .document-container {
+      max-width: 800px;
+      margin: 30px auto;
+      background: #ffffff;
+      padding: 60px 70px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+      border-radius: 4px;
+    }
+
+    @media print {
+      body {
+        background: transparent;
+      }
+      .document-container {
+        max-width: 100%;
+        margin: 0;
+        padding: 0;
+        box-shadow: none;
+        border-radius: 0;
+      }
+      .page-break {
+        page-break-after: always;
+        break-after: page;
+      }
+      .no-print {
+        display: none !important;
+      }
+    }
+
+    /* Print toolbar */
+    .print-toolbar {
+      position: sticky;
+      top: 15px;
+      z-index: 1000;
+      max-width: 800px;
+      margin: 0 auto 15px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: #0f172a;
+      color: #ffffff;
+      padding: 12px 20px;
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+      font-family: 'Inter', sans-serif;
+    }
+    .print-btn {
+      background: #059669;
+      color: #fff;
+      border: none;
+      padding: 8px 18px;
+      font-size: 13px;
+      font-weight: 600;
+      border-radius: 6px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .print-btn:hover {
+      background: #047857;
+    }
+
+    /* Cover Page */
+    .cover-page {
+      text-align: center;
+      min-height: 900px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      page-break-after: always;
+    }
+
+    .project-title {
+      font-size: 26pt;
+      font-weight: 700;
+      letter-spacing: 1px;
+      color: #0f172a;
+      margin-bottom: 6px;
+      text-transform: uppercase;
+    }
+
+    .project-subtitle {
+      font-size: 14pt;
+      font-weight: 600;
+      color: #059669;
+      margin-bottom: 20px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .synopsis-badge {
+      font-size: 12pt;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      color: #475569;
+      margin: 15px 0;
+    }
+
+    .college-crest {
+      width: 140px;
+      height: auto;
+      margin: 25px auto;
+      display: block;
+    }
+
+    .submission-block {
+      margin: 20px 0;
+      font-size: 11pt;
+    }
+
+    .submission-grid {
+      display: flex;
+      justify-content: space-between;
+      text-align: left;
+      margin-top: 30px;
+      font-family: 'Inter', sans-serif;
+      font-size: 10pt;
+    }
+
+    .dept-footer {
+      border-top: 1.5px solid #0f172a;
+      padding-top: 15px;
+      margin-top: 30px;
+      font-size: 10.5pt;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    /* Typography & Headers */
+    h1, h2, h3, h4 {
+      font-family: 'Inter', sans-serif;
+      color: #0f172a;
+    }
+
+    h2 {
+      font-size: 14pt;
+      font-weight: 700;
+      border-bottom: 1.5px solid #e2e8f0;
+      padding-bottom: 4px;
+      margin-top: 30px;
+      margin-bottom: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    h3 {
+      font-size: 12pt;
+      font-weight: 700;
+      margin-top: 20px;
+      margin-bottom: 8px;
+    }
+
+    p {
+      text-align: justify;
+      margin-bottom: 10px;
+    }
+
+    ul, ol {
+      margin-top: 6px;
+      margin-bottom: 14px;
+      padding-left: 24px;
+    }
+
+    li {
+      margin-bottom: 5px;
+      text-align: justify;
+    }
+
+    /* Tables */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 18px 0;
+      font-family: 'Inter', sans-serif;
+      font-size: 9.5pt;
+    }
+
+    th, td {
+      border: 1px solid #cbd5e1;
+      padding: 8px 12px;
+      text-align: left;
+    }
+
+    th {
+      background-color: #f1f5f9;
+      font-weight: 700;
+      color: #0f172a;
+    }
+
+    tr:nth-child(even) {
+      background-color: #f8fafc;
+    }
+
+    /* Diagram Containers */
+    .diagram-box {
+      background: #f8fafc;
+      border: 1px solid #cbd5e1;
+      border-radius: 6px;
+      padding: 16px;
+      margin: 20px 0;
+      font-family: 'Courier New', Courier, monospace;
+      font-size: 8.5pt;
+      line-height: 1.35;
+      overflow-x: auto;
+      white-space: pre;
+    }
+
+    .diagram-caption {
+      text-align: center;
+      font-family: 'Inter', sans-serif;
+      font-size: 9.5pt;
+      font-style: italic;
+      color: #475569;
+      margin-top: 6px;
+      margin-bottom: 20px;
+    }
+
+    .highlight-pill {
+      display: inline-block;
+      background: #ecfdf5;
+      color: #065f46;
+      border: 1px solid #a7f3d0;
+      padding: 2px 8px;
+      border-radius: 12px;
+      font-family: 'Inter', sans-serif;
+      font-size: 9pt;
+      font-weight: 600;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Screen Top Bar with Print / Save PDF Button -->
+  <div class="print-toolbar no-print">
+    <div>
+      <strong>Tifinify - MCA Minor Project Synopsis</strong>
+      <span style="opacity: 0.7; font-size: 12px; margin-left: 8px;">(Session: 2025–27)</span>
+    </div>
+    <button class="print-btn" onclick="window.print()">
+      🖨️ Print / Save as PDF
+    </button>
+  </div>
+
+  <div class="document-container">
+
+    <!-- ==================== COVER PAGE ==================== -->
+    <div class="cover-page page-break">
+      <div>
+        <div class="project-title">“TIFINIFY”</div>
+        <div class="project-subtitle">AI-Powered Tiffin & Mess Service Discovery and Review Trust Analysis System</div>
+        <div class="synopsis-badge">A PROJECT SYNOPSIS REPORT</div>
+        <div style="font-size: 11pt; color: #475569; font-style: italic;">
+          Submitted in partial fulfilment of the requirement for the award of the degree of
+        </div>
+        <div style="font-size: 13pt; font-weight: 700; margin: 10px 0; color: #0f172a; text-transform: uppercase; font-family: 'Inter', sans-serif;">
+          Master of Computer Application
+        </div>
+        <div style="font-size: 11pt; font-weight: 600; font-family: 'Inter', sans-serif;">
+          SESSION: 2025–27
+        </div>
+      </div>
+
+      <div>
+        <!-- Institutional Emblem Placeholder / Graphic -->
+        <svg class="college-crest" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M50 5 L90 20 V55 C90 75 50 95 50 95 C50 95 10 75 10 55 V20 Z" fill="#881337" stroke="#fbbf24" stroke-width="3"/>
+          <path d="M50 15 L80 26 V52 C80 68 50 84 50 84 C50 84 20 68 20 52 V26 Z" fill="#9f1239"/>
+          <text x="50" y="48" font-family="'Inter', sans-serif" font-size="8" font-weight="bold" fill="#fef08a" text-anchor="middle">JEC</text>
+          <text x="50" y="58" font-family="'Inter', sans-serif" font-size="6" fill="#ffffff" text-anchor="middle">ESTD. 1947</text>
+        </svg>
+      </div>
+
+      <div class="submission-grid">
+        <div>
+          <strong>Submitted by:</strong><br>
+          <span style="font-size: 11pt; font-weight: 600;">Pranab Chourasiya</span> (0201CA251047)<br>
+          <span style="font-size: 11pt; font-weight: 600;">Chandrashekhar Suryawanshi</span> (0201CA251018)<br>
+          III SEM. MCA<br><br>
+          <strong>Submitted to:</strong><br>
+          <strong>Dr. SAMAR UPADHYAY</strong><br>
+          <strong>Dr. MAMTA LAMBERT</strong><br>
+          <em>Head of Department (HOD)</em>
+        </div>
+        <div style="text-align: right;">
+          <strong>Under the Guidance of:</strong><br>
+          Professor Roshni Vinodia<br>
+          Professor Anjali Sahu<br>
+          Professor Megha Malik<br>
+          Professor Swapnila Kashyap<br>
+          Professor Shikha Singh Narela
+        </div>
+      </div>
+
+      <div class="dept-footer">
+        Department of Computer Application<br>
+        <strong>Jabalpur Engineering College, Jabalpur (M.P.)</strong><br>
+        <span style="font-size: 8.5pt; font-weight: 400; text-transform: none; color: #475569;">
+          (Established in 1947 as Government Engineering College, Jabalpur • Declared Autonomous by Government of Madhya Pradesh and RGPV, Bhopal)
+        </span>
+      </div>
+    </div>
+
+    <!-- ==================== INDEX ==================== -->
+    <div class="page-break">
+      <h2>INDEX</h2>
+      <table>
+        <thead>
+          <tr>
+            <th style="width: 10%;">S. No.</th>
+            <th style="width: 75%;">Topic</th>
+            <th style="width: 15%; text-align: right;">Page No.</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>1.</td><td><strong>Preface</strong></td><td style="text-align: right;">3</td></tr>
+          <tr><td>2.</td><td><strong>Introduction</strong> (Background, Problem Statement, Significance)</td><td style="text-align: right;">4</td></tr>
+          <tr><td>3.</td><td><strong>Scope and Objectives of the System</strong></td><td style="text-align: right;">5</td></tr>
+          <tr><td>4.</td><td><strong>Feasibility Study</strong> (Technical, Economic, Operational, Schedule, Ethical)</td><td style="text-align: right;">6</td></tr>
+          <tr><td>5.</td><td><strong>System Requirements</strong> (Hardware & Software Specifications)</td><td style="text-align: right;">7</td></tr>
+          <tr><td>6.</td><td><strong>Technologies Used</strong> (Python, Flask, Gemini AI, Scikit-Learn, SQLite, Leaflet)</td><td style="text-align: right;">8</td></tr>
+          <tr><td>7.</td><td><strong>Goals</strong></td><td style="text-align: right;">9</td></tr>
+          <tr><td>8.</td><td><strong>Proposed System</strong> (MCDA Model, Real Discovery Pipeline, Fallback Architecture)</td><td style="text-align: right;">9</td></tr>
+          <tr><td>9.</td><td><strong>Modules</strong> (Detailed Breakdown of 13 Core Modules)</td><td style="text-align: right;">10</td></tr>
+          <tr><td>10.</td><td><strong>Implementation of DFD</strong> (Level 0 Context, Level 1 & DFD Interpretation)</td><td style="text-align: right;">12</td></tr>
+          <tr><td>11.</td><td><strong>ER Diagram – Database</strong> (Schema Architecture & Entity Descriptions)</td><td style="text-align: right;">15</td></tr>
+          <tr><td>12.</td><td><strong>Functional Requirements</strong></td><td style="text-align: right;">17</td></tr>
+          <tr><td>13.</td><td><strong>Non-Functional Requirements</strong></td><td style="text-align: right;">17</td></tr>
+          <tr><td>14.</td><td><strong>Methodology</strong> (Agile & Modular Development Flow)</td><td style="text-align: right;">18</td></tr>
+          <tr><td>15.</td><td><strong>Database Details and Data Integrity</strong></td><td style="text-align: right;">18</td></tr>
+          <tr><td>16.</td><td><strong>Expected Outcomes</strong></td><td style="text-align: right;">19</td></tr>
+          <tr><td>17.</td><td><strong>Advantages</strong></td><td style="text-align: right;">19</td></tr>
+          <tr><td>18.</td><td><strong>Limitations</strong></td><td style="text-align: right;">20</td></tr>
+          <tr><td>19.</td><td><strong>Future Scope</strong></td><td style="text-align: right;">20</td></tr>
+          <tr><td>20.</td><td><strong>Conclusion</strong></td><td style="text-align: right;">21</td></tr>
+          <tr><td>21.</td><td><strong>References</strong></td><td style="text-align: right;">22</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- ==================== 1. PREFACE ==================== -->
+    <div>
+      <h2>1. PREFACE</h2>
+      <p>
+        The rapid migration of students, interns, and young working professionals toward major educational and industrial centers has fundamentally transformed the demand for daily meal solutions. Unlike occasional restaurant dining, subscribing to a local mess or daily tiffin delivery service represents an essential health and financial commitment. Consumers depend upon their meal provider twice a day, every day, for nutritional balance, digestive hygiene, and predictable delivery.
+      </p>
+      <p>
+        Consequently, consumer decision-making relies almost entirely on online customer feedback and ratings. However, contemporary commercial search directories and mapping platforms suffer from severe vulnerabilities: arithmetic star ratings (e.g. 4.6/5) are routinely distorted by paid 5-star review campaigns, copy-pasted marketing text, coordinated review bursts, and automated bot submissions. Conversely, authentic consumer warnings regarding poor sanitation, food poisoning, or erratic delivery are easily masked by inflated aggregates.
+      </p>
+      <p>
+        <strong>Tifinify</strong> has been conceptualized and engineered as an integrated Master of Computer Application software project to solve this exact trust deficit. Rather than functioning as a passive business catalog, Tifinify unites modern web engineering, spatial algorithms, natural language processing, machine learning heuristics, grounded generative AI, and responsive web design into an objective consumer decision-support ecosystem.
+      </p>
+      <p>
+        The defining engineering principle of Tifinify is <strong>Explainable Review Intelligence & Trust Auditing</strong>. The platform explicitly separates external star ratings from an objective, mathematically derived <strong>Review Trust Score (0–100)</strong>. Using TF-IDF n-gram vectorization, pairwise Cosine Similarity (for duplicate detection), sentiment-rating inconsistency checks, temporal burst heuristics, and Google Gemini AI contextual synthesis with real web grounding, Tifinify empowers users with transparent evaluations.
+      </p>
+      <p>
+        Additionally, Tifinify exhibits strong architectural resilience. While Google Gemini delivers rich contextual summaries, the system incorporates deterministic local NLP heuristics and zero-billing web search intelligence (DuckDuckGo and OpenStreetMap Overpass API) as a primary operational pipeline. This guarantees uninterrupted real business discovery even without paid external commercial API keys.
+      </p>
+    </div>
+
+    <!-- ==================== 2. INTRODUCTION ==================== -->
+    <div>
+      <h2>2. INTRODUCTION</h2>
+      <p>
+        Finding hygienic, affordable, and dependable food upon relocating to an unfamiliar city is one of the most stressful challenges facing university students and junior professionals. While commercial food delivery giants cater to high-margin restaurant orders, local tiffin kitchens and student messes operate in an unorganized sector characterized by zero regulatory transparency and high review manipulation.
+      </p>
+      <p>
+        Tifinify bridges this gap by transforming local meal discovery into an intelligent, guided web workflow. Users can explore verified providers within customizable geographic radiuses (1 km, 3 km, 5 km, 10 km), inspect interactive spatial maps, contrast monthly subscription plans, and examine an explainable AI trust audit distinguishing genuine community experiences from deceptive promotional spam.
+      </p>
+
+      <h3>2.1 Background</h3>
+      <p>
+        Mainstream search engines and directory platforms aggregate numerical star ratings through simple arithmetic averaging. This naive model fails to analyze review credibility, text uniqueness, or temporal distribution. A vendor with 40 manufactured 5-star blurbs posted in 48 hours easily outranks a genuine home cook with 20 balanced, authentic reviews. Tifinify addresses this through a hybrid AI intelligence pipeline combining statistical machine learning with generative language models.
+      </p>
+
+      <h3>2.2 Problem Statement</h3>
+      <p>
+        Students and young professionals lack a reliable, objective system to discover authentic local tiffin and mess providers, evaluate actual food hygiene and taste, and detect manipulated online ratings. The problem addressed by Tifinify is to design and develop an intelligent, location-based web application that discovers genuine physical food establishments, audits customer reviews through machine learning heuristics, computes an explainable Review Trust Score (0–100), extracts multi-aspect sentiment, and presents findings through an accessible, dark-mode-enabled interface.
+      </p>
+
+      <h3>2.3 Significance of the Project</h3>
+      <p>
+        The significance of Tifinify lies in demonstrating that responsible, explainable Artificial Intelligence can be seamlessly integrated with full-stack web software. The project integrates multi-radius spatial filtering, TF-IDF cosine similarity matrices, grounded Gemini AI synthesis, SQLite relational storage, Leaflet mapping, and responsive web design into an open-source, zero-billing architecture.
+      </p>
+    </div>
+
+    <!-- ==================== 3. SCOPE AND OBJECTIVES ==================== -->
+    <div class="page-break">
+      <h2>3. SCOPE AND OBJECTIVES OF THE SYSTEM</h2>
+      <p>
+        The scope of Tifinify is focused on individual food discovery, review authenticity verification, and consumer decision support for daily recurring meal services. The system processes voluntary customer feedback, public web directory listings, and geographic coordinates to deliver structured analytical findings. The scope does not include kitchen inventory management, order cooking, or payment escrow.
+      </p>
+
+      <h3>Objectives</h3>
+      <ul>
+        <li><strong>Multi-Radius Spatial Search:</strong> Enable location-based discovery across 1 km, 3 km, 5 km, and 10 km boundaries using the Haversine trigonometric formula.</li>
+        <li><strong>Zero-Billing Place Discovery:</strong> Implement real-world search intelligence adapters (DuckDuckGo, Google Search index, OpenStreetMap Overpass API) to locate authentic operational businesses without commercial API costs.</li>
+        <li><strong>AI Review Intelligence:</strong> Integrate Google Gemini AI (`google-genai` SDK) with real search grounding to generate objective, 2-3 sentence summaries of customer experiences.</li>
+        <li><strong>Deterministic NLP Trust Auditing:</strong> Formulate a 4-pillar MCDA Trust Score based on text uniqueness (TF-IDF Cosine Similarity), rating-sentiment consistency, and burst heuristics.</li>
+        <li><strong>Aspect-Based Sentiment Breakdown:</strong> Extract sentiment across five key food service dimensions: <em>Taste, Hygiene, Food Quality, Delivery, and Value for Money</em>.</li>
+        <li><strong>Rating Separation & Badging:</strong> Clearly distinguish raw external star ratings (e.g. ⭐ 4.5/5) from Tifinify's AI Review Trust Score (e.g. 🛡 92/100).</li>
+        <li><strong>Geospatial Map Visualization:</strong> Plot meal providers on interactive Leaflet.js maps with custom category pins (Veg, Non-Veg, Both, Jain).</li>
+        <li><strong>Accessible Modern UI:</strong> Deliver a sleek food-tech interface featuring a persistent, zero-flicker Dark/Light theme mode.</li>
+        <li><strong>Objective Comparison Tool:</strong> Provide a side-by-side tabular comparison module contrasting distance, monthly pricing, aspect satisfaction, and trust scores.</li>
+        <li><strong>Secure Authentication & Storage:</strong> Manage user preferences, favorites, and accounts using salted Werkzeug password hashing and relational SQLite storage.</li>
+      </ul>
+    </div>
+
+    <!-- ==================== 4. FEASIBILITY STUDY ==================== -->
+    <div>
+      <h2>4. FEASIBILITY STUDY</h2>
+      <p>
+        A comprehensive feasibility study confirms that Tifinify can be engineered, tested, and maintained within the academic timeframe, hardware resources, and technical skill set of an MCA candidate.
+      </p>
+
+      <h3>4.1 Technical Feasibility</h3>
+      <p>
+        The project is implemented using modern, stable technologies: Python 3.11+, Flask 3.x, SQLAlchemy 2.0 ORM, `scikit-learn`, and Bootstrap 5. Geospatial mapping utilizes client-side Leaflet.js and OpenStreetMap, eliminating complex proprietary SDKs. Cloud AI utilizes the official Google GenAI SDK. The complete codebase has been verified via 22 automated pytest test suites, proving high technical viability.
+      </p>
+
+      <h3>4.2 Economic Feasibility</h3>
+      <p>
+        The financial cost of developing and deploying Tifinify is exactly zero ($0). Python, Flask, SQLite, Leaflet, and Bootstrap are open-source. Geocoding and place discovery utilize free Open-Meteo, DuckDuckGo, and Overpass APIs. Gemini AI operates within Google AI Studio's free tier. The application includes a `Procfile` and `render.yaml` for 100% free cloud deployment on Render.com.
+      </p>
+
+      <h3>4.3 Operational Feasibility</h3>
+      <p>
+        The interface is clean, mobile-responsive, and intuitive. Users can detect their location with a single click or search any locality. Mathematical trust scores are simplified into intuitive badges (<em>Likely Authentic</em>, <em>Potentially Suspicious</em>, <em>Highly Suspicious</em>). The system operates seamlessly on all modern browsers (Chrome, Edge, Firefox, Safari).
+      </p>
+
+      <h3>4.4 Schedule Feasibility</h3>
+      <p>
+        Development was structured across modular, agile milestones: schema design, spatial search engine, TF-IDF trust algorithms, Gemini AI integration, real-place search adapters, UI/dark mode engineering, and automated testing. All phases were completed systematically within the semester schedule.
+      </p>
+
+      <h3>4.5 Ethical and Privacy Feasibility</h3>
+      <p>
+        Tifinify adheres strictly to data ethics. User geolocation is ephemeral and never tracked. User credentials are encrypted with cryptographic salts. Scraped listings represent public commercial establishments. The trust algorithm operates on transparent, explainable heuristics rather than arbitrary vendor discrimination.
+      </p>
+    </div>
+
+    <!-- ==================== 5. SYSTEM REQUIREMENTS ==================== -->
+    <div class="page-break">
+      <h2>5. SYSTEM REQUIREMENTS</h2>
+
+      <h3>5.1 Hardware Requirements</h3>
+      <table>
+        <thead>
+          <tr>
+            <th>Component</th>
+            <th>Minimum Requirement</th>
+            <th>Recommended Requirement</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Processor</strong></td>
+            <td>Dual-Core 64-bit CPU (Intel Core i3 / AMD Ryzen 3)</td>
+            <td>Quad-Core 64-bit CPU (Intel Core i5 / AMD Ryzen 5 or above)</td>
+          </tr>
+          <tr>
+            <td><strong>RAM</strong></td>
+            <td>4 GB minimum</td>
+            <td>8 GB recommended</td>
+          </tr>
+          <tr>
+            <td><strong>Storage</strong></td>
+            <td>500 MB free space</td>
+            <td>2 GB free SSD space</td>
+          </tr>
+          <tr>
+            <td><strong>Display</strong></td>
+            <td>1280 × 720 resolution</td>
+            <td>1920 × 1080 Full HD</td>
+          </tr>
+          <tr>
+            <td><strong>Network</strong></td>
+            <td>Internet connection for web search, maps, and Gemini AI</td>
+            <td>High-speed Broadband / Wi-Fi</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h3>5.2 Software Requirements</h3>
+      <table>
+        <thead>
+          <tr>
+            <th>Software / Technology</th>
+            <th>Specification / Version</th>
+            <th>Purpose</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Operating System</strong></td>
+            <td>Windows 10/11, Ubuntu Linux, or macOS</td>
+            <td>Host and Execution Environment</td>
+          </tr>
+          <tr>
+            <td><strong>Programming Language</strong></td>
+            <td>Python 3.11 / 3.12 / 3.14</td>
+            <td>Core Application Logic & Mathematical Computation</td>
+          </tr>
+          <tr>
+            <td><strong>Web Framework</strong></td>
+            <td>Flask 3.0+</td>
+            <td>WSGI Web Routing, Controllers, Templates</td>
+          </tr>
+          <tr>
+            <td><strong>Database</strong></td>
+            <td>SQLite 3 (via SQLAlchemy 2.0 ORM)</td>
+            <td>Relational Storage of Users, Providers, and Reviews</td>
+          </tr>
+          <tr>
+            <td><strong>AI & Machine Learning</strong></td>
+            <td>`google-genai` (0.1+), `scikit-learn` (1.4+), `numpy`</td>
+            <td>TF-IDF Similarity & Gemini Grounded AI Summarization</td>
+          </tr>
+          <tr>
+            <td><strong>Frontend Framework</strong></td>
+            <td>Bootstrap 5.3.3 & Bootstrap Icons</td>
+            <td>Responsive UI, Components, and Color Modes</td>
+          </tr>
+          <tr>
+            <td><strong>Mapping Engine</strong></td>
+            <td>Leaflet.js 1.9.4 & OpenStreetMap</td>
+            <td>Geospatial Map Visualization and Custom Pins</td>
+          </tr>
+          <tr>
+            <td><strong>Visualizations</strong></td>
+            <td>Chart.js 4.x</td>
+            <td>Aspect & Sentiment Doughnut Visualizations</td>
+          </tr>
+          <tr>
+            <td><strong>Production Server</strong></td>
+            <td>Gunicorn 21.2+</td>
+            <td>Production WSGI Server for Cloud Hosting</td>
+          </tr>
+          <tr>
+            <td><strong>Testing Framework</strong></td>
+            <td>pytest 8.x / 9.x</td>
+            <td>Automated Unit and Integration Testing</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- ==================== 6. TECHNOLOGIES USED ==================== -->
+    <div>
+      <h2>6. TECHNOLOGIES USED</h2>
+      <p>
+        The technology stack in Tifinify was chosen to achieve high performance, clean architectural separation, and zero operational overhead.
+      </p>
+
+      <h3>6.1 Python</h3>
+      <p>
+        Python serves as the primary programming language, executing routing, trigonometric calculations, machine learning pipelines, and database operations within a cohesive ecosystem.
+      </p>
+
+      <h3>6.2 Flask Web Framework</h3>
+      <p>
+        Flask 3.x provides the core web architecture. Using the <strong>Application Factory</strong> pattern (`create_app`) and <strong>Blueprints</strong> (`main_bp`, `provider_bp`, `auth_bp`, `api_bp`, `admin_bp`), the application maintains clean separation between routing, business logic, and RESTful APIs.
+      </p>
+
+      <h3>6.3 Google Gemini AI & Grounded Search</h3>
+      <p>
+        Google Gemini (`gemini-2.5-flash`) acts as the contextual intelligence layer. When customer reviews are ingested, Gemini synthesizes grounded, objective summaries. Furthermore, with Google Search grounding enabled, Gemini identifies operational food services in any target city.
+      </p>
+
+      <h3>6.4 NLP & Scikit-Learn Heuristic Engine</h3>
+      <p>
+        The review trust pipeline uses `scikit-learn` to vectorize review texts into n-gram TF-IDF matrices. Pairwise Cosine Similarity matrices uncover duplicate spam. Rule-based heuristics flag temporal bursts and sentiment-rating contradictions.
+      </p>
+
+      <h3>6.5 SQLite & SQLAlchemy ORM</h3>
+      <p>
+        SQLite provides an integrated relational database requiring zero external daemon management. SQLAlchemy 2.0 ORM manages relational integrity, migrations, cascading deletes, and optimized queries.
+      </p>
+
+      <h3>6.6 OpenMaps (Leaflet.js & OpenStreetMap Overpass)</h3>
+      <p>
+        Interactive maps are rendered client-side using Leaflet.js. Real business queries interface with OpenStreetMap's Overpass API (`overpass-api.de`) to discover registered canteens, messes, and eateries without requiring paid commercial mapping keys.
+      </p>
+
+      <h3>6.7 Supporting Technologies</h3>
+      <p>
+        Bootstrap 5.3.3 handles responsive design; Chart.js renders canvas sentiment distributions; Werkzeug manages password security; and Open-Meteo & IP-geolocation APIs provide automated coordinate resolution.
+      </p>
+    </div>
+
+    <!-- ==================== 7. GOALS & 8. PROPOSED SYSTEM ==================== -->
+    <div class="page-break">
+      <h2>7. GOALS</h2>
+      <ul>
+        <li>Develop an intelligent, trustworthy web application for daily meal provider discovery.</li>
+        <li>Eliminate reliance on easily manipulated star averages by calculating mathematical trust scores.</li>
+        <li>Ensure zero commercial API dependency through open web search and OpenStreetMap adapters.</li>
+        <li>Provide actionable, multi-dimensional aspect ratings across Hygiene, Taste, Delivery, Quality, and Price.</li>
+        <li>Deliver high architectural resilience through automatic local NLP fallback when external cloud AI is unavailable.</li>
+        <li>Guarantee universal accessibility with a mobile-responsive interface and zero-flicker dark mode.</li>
+      </ul>
+
+      <h2>8. PROPOSED SYSTEM</h2>
+      <p>
+        Tifinify is architectured as a multi-tier web application adhering to MVC and service-layer patterns. Users search for an area or activate GPS geolocation. The system computes coordinates, runs Haversine spatial queries, and automatically executes live web search discovery if a new area is searched.
+      </p>
+      <p>
+        Every provider record displays two distinct, uncoupled metrics: raw customer star ratings (⭐ 4.6/5) and Tifinify's AI Review Trust Score (🛡 88/100). Users can view sentiment charts, read Gemini AI summaries, inspect aspect satisfaction, view map locations, and compare providers side-by-side.
+      </p>
+
+      <div class="diagram-box">
+[ User Query / GPS ] ──► [ Spatial Controller ] ──► [ Haversine DB Query ]
+                                  │
+                                  ├──► [ Live Web Search / Overpass Ingestion ]
+                                  │               │
+                                  │               ▼
+                                  └──► [ Review Intelligence & Trust Engine ]
+                                                  │
+                                                  ├──► TF-IDF Cosine Similarity Matrix
+                                                  ├──► 5-Pillar Aspect Sentiment Extractor
+                                                  ├──► Rating-Sentiment Contradiction Check
+                                                  └──► Grounded Gemini AI Summarizer
+                                                  │
+                                                  ▼
+                                       [ Explainable Trust Score (0-100) ]
+                                                  │
+                                                  ▼
+                                       [ UI Map / Cards / Comparison View ]
+      </div>
+      <div class="diagram-caption">Figure 8.1: Tifinify End-to-End System Architecture</div>
+
+      <h3>8.1 Multi-Criteria Review Trust Evaluation Model</h3>
+      <p>
+        The Review Trust Score is computed through a 4-pillar Multi-Criteria Decision Analysis (MCDA) model:
+      </p>
+      <ul>
+        <li><strong>Text Diversity & Uniqueness (35%):</strong> Penalizes duplicate phrasing identified via TF-IDF cosine similarity (>0.85 threshold).</li>
+        <li><strong>Rating-Sentiment Consistency (25%):</strong> Detects contradictions between 5-star ratings and severe complaints (*"spoiled"*, *"hair in food"*, *"stale"*).</li>
+        <li><strong>Temporal Burst Distribution (20%):</strong> Identifies unnatural review clusters published within short timeframes.</li>
+        <li><strong>Reviewer Sample Volume & Profile Balance (20%):</strong> Evaluates sample size and distribution fairness.</li>
+      </ul>
+
+      <h3>8.2 Real Business Search Intelligence Pipeline</h3>
+      <p>
+        When searching an unseeded locality, `WebSearchPlacesAdapter` queries DuckDuckGo and Google search indices using targeted regex filters (`\b(tiffin|mess|rasoi|bhojanalaya|canteen)\b`) and queries OpenStreetMap Overpass with a 3-second timeout. Extracted establishments are sanitized, ingested, scored, and plotted.
+      </p>
+
+      <h3>8.3 AI and Grounded Fallback Flow</h3>
+      <p>
+        <strong>Primary Flow:</strong> Gemini AI generates contextual review summaries and discovers businesses via Google Search grounding.<br>
+        <strong>Fallback Flow:</strong> If the Gemini API quota is exhausted or key omitted, the platform automatically activates deterministic local NLP heuristics and web scraping with zero interruption.
+      </p>
+    </div>
+
+    <!-- ==================== 9. MODULES ==================== -->
+    <div>
+      <h2>9. MODULES</h2>
+      <p>
+        Tifinify's codebase is strictly modularized into independent, cohesive functional modules:
+      </p>
+
+      <h3>9.1 Authentication & User Preferences Module</h3>
+      <p>Handles user registration, login, session persistence, role authorization (Consumer vs. Administrator), dietary preferences, and search radius defaults. Passwords utilize salted Werkzeug hashing.</p>
+
+      <h3>9.2 Spatial Discovery & Multi-Radius Search Module</h3>
+      <p>Executes spherical Haversine trigonometric distance calculations, filtering providers within 1 km, 3 km, 5 km, and 10 km radiuses alongside category, dietary, and budget constraints.</p>
+
+      <h3>9.3 Real-World Web & Overpass Search Intelligence Module</h3>
+      <p>Integrates `WebSearchPlacesAdapter` to discover authentic operational providers from public web directories and OpenStreetMap Overpass servers without requiring paid Google Maps billing.</p>
+
+      <h3>9.4 Gemini AI Contextual Review Intelligence Module</h3>
+      <p>Utilizes Google Gemini (`google-genai` SDK) to synthesize concise, objective 2-3 sentence summaries of customer experiences, highlighting recurring praises and complaints.</p>
+
+      <h3>9.5 TF-IDF Similarity & Duplicate Detection Engine</h3>
+      <p>Converts reviews into n-gram TF-IDF matrices using `scikit-learn` and calculates pairwise Cosine Similarity. Pairs scoring above 0.85 are flagged as duplicate promotional spam.</p>
+
+      <h3>9.6 Behavioral Heuristics & Sentiment Inconsistency Module</h3>
+      <p>Identifies severe rating-text contradictions (e.g., 5.0 stars accompanied by terms like *"stale"*, *"unhygienic"*, or *"food poisoning"*).</p>
+
+      <h3>9.7 Aspect-Based Extraction & Scoring Module</h3>
+      <p>Extracts and quantifies sentiment across five vital dimensions: <em>Taste, Hygiene, Food Quality, Delivery, and Value for Money</em>.</p>
+
+      <h3>9.8 Explainable Trust Badge & Rating Separation Module</h3>
+      <p>Assigns normalized Trust Scores (0–100) and displays intuitive badges: 🛡 <em>Likely Authentic</em> (≥75), ⚠️ <em>Potentially Suspicious</em> (50–74), 🚨 <em>Highly Suspicious</em> (&lt;50).</p>
+
+      <h3>9.9 Side-by-Side Provider Comparison Module</h3>
+      <p>Renders a tabular side-by-side comparison (`/providers/compare`) contrasting distance, pricing, aspect satisfaction, and review trust.</p>
+
+      <h3>9.10 Interactive OpenMaps / Leaflet Mapping Module</h3>
+      <p>Renders OpenStreetMap tiles via Leaflet.js with dynamic markers, radius circles, interactive popups, and automatic dark-mode tile styling.</p>
+
+      <h3>9.11 Dark/Light Theme & UI State Engine</h3>
+      <p>Delivers a theme switcher with an inline pre-hydration script in `<head>` that reads `localStorage` and system settings, completely eliminating white page-load flicker.</p>
+
+      <h3>9.12 Admin Governance & Telemetry Audit Module</h3>
+      <p>Provides an administrative portal displaying system telemetry: registered users, active providers, reviews analyzed, flagged duplicate reviews, and audit logs.</p>
+
+      <h3>9.13 Automated Testing & Quality Assurance Module</h3>
+      <p>Houses the automated `pytest` suite containing 22 unit and integration tests verifying NLP heuristics, database integrity, and API routes.</p>
+    </div>
+
+    <!-- ==================== 10. DFD ==================== -->
+    <div class="page-break">
+      <h2>10. IMPLEMENTATION OF DFD (DATA FLOW DIAGRAM)</h2>
+      <p>
+        The Data Flow Diagrams illustrate how information enters, transforms, and persists within Tifinify.
+      </p>
+
+      <h3>10.1 System Overview DFD (Level 0 - Context Level)</h3>
+      <div class="diagram-box">
+                       ┌─────────────────────────┐
+                       │          User           │
+                       └────────────┬────────────┘
+                                    │
+               1. Query / Location  │  4. Results, Trust Badges,
+                  & Credentials     │     Map & Comparisons
+                                    ▼
+                       ┌─────────────────────────┐
+                       │       0. TIFINIFY       │
+                       │     AI Trust System     │
+                       └────────────┬────────────┘
+                                    │
+          ┌─────────────────────────┼─────────────────────────┐
+          │ 2. Sync / Place Query   │ 3. Reviews & Context    │ 5. CRUD Data
+          ▼                         ▼                         ▼
+┌──────────────────┐      ┌──────────────────┐      ┌──────────────────┐
+│  OpenStreetMap / │      │  Google Gemini   │      │  SQLite Database │
+│    Web Search    │      │    AI Engine     │      │   (Local ORM)    │
+└──────────────────┘      └──────────────────┘      └──────────────────┘
+      </div>
+      <div class="diagram-caption">Figure 10.1: Tifinify Level 0 Context Diagram</div>
+
+      <h3>10.2 Level 1 DFD (Decomposed Data Flow Diagram)</h3>
+      <div class="diagram-box">
+[ User ]
+   │
+   ├──────────► ( 1.0 User Authentication ) ──────────► [ D1: Users & Preferences ]
+   │                     │
+   │                     ▼
+   ├──────────► ( 2.0 Spatial Search & Geocoding )
+   │                     │
+   │                     ├──► [ D2: Providers ]
+   │                     │
+   │                     ▼
+   ├──────────► ( 3.0 Real Place Discovery ) ─────────► [ Web Search & Overpass ]
+   │                     │
+   │                     ▼
+   │            ( 4.0 Review Ingestion ) ─────────────► [ D3: Reviews ]
+   │                     │
+   │                     ▼
+   │            ( 5.0 NLP & Trust Scoring Engine )
+   │                     │
+   │                     ├──► [ TF-IDF Cosine Similarity Matrix ]
+   │                     ├──► [ Aspect & Heuristic Contradiction Analyzer ]
+   │                     └──► [ Google Gemini Grounded Summarizer ]
+   │                     │
+   │                     ▼
+   └──────────◄ ( 6.0 Results, Map & Comparison View ) ◄── [ D4: Trust Summaries ]
+      </div>
+      <div class="diagram-caption">Figure 10.2: Tifinify Level 1 Detailed Data Flow Diagram</div>
+
+      <h3>10.3 DFD Interpretation</h3>
+      <p>
+        <strong>1.0 Authentication:</strong> Validates user credentials against encrypted hashes in `D1: Users`.<br>
+        <strong>2.0 & 3.0 Spatial Query & Place Discovery:</strong> Converts query text to coordinates; queries `D2: Providers` using Haversine formulas. If empty, triggers real-world web discovery.<br>
+        <strong>4.0 & 5.0 Review NLP & Trust Scoring:</strong> Parses reviews, applies TF-IDF Cosine Similarity, scans for rating contradictions, extracts 5-pillar aspect scores, and synthesizes Gemini summaries.<br>
+        <strong>6.0 Result Presentation:</strong> Renders interactive Leaflet maps, explainable badges, and comparison tables.
+      </p>
+    </div>
+
+    <!-- ==================== 11. ER DIAGRAM ==================== -->
+    <div class="page-break">
+      <h2>11. ER DIAGRAM – DATABASE</h2>
+      <div class="diagram-box">
+ ┌──────────────────┐                 ┌───────────────────────┐
+ │      USERS       │ 1             * │       FAVORITES       │
+ │──────────────────│─────────────────│───────────────────────│
+ │ id (PK)          │                 │ id (PK)               │
+ │ email            │                 │ user_id (FK)          │
+ │ password_hash    │                 │ provider_id (FK)      │
+ │ role             │                 │ created_at            │
+ └────────┬─────────┘                 └───────────────────────┘
+          │ 1
+          │
+          │ 1 
+ ┌────────┴─────────┐                 ┌───────────────────────┐
+ │ USER_PREFERENCES │                 │   PROVIDER_SOURCES    │
+ │──────────────────│                 │───────────────────────│
+ │ id (PK)          │                 │ id (PK)               │
+ │ user_id (FK)     │                 │ provider_id (FK)      │
+ │ budget_min       │                 │ source_type           │
+ │ budget_max       │                 │ external_id           │
+ │ max_distance_km  │                 │ last_synced_at        │
+ └──────────────────┘                 └───────────┬───────────┘
+                                                  │ *
+                                                  │
+                                                  │ 1 
+ ┌──────────────────┐ 1             * ┌───────────┴───────────┐
+ │     REVIEWS      │─────────────────│       PROVIDERS       │
+ │──────────────────│                 │───────────────────────│
+ │ id (PK)          │                 │ id (PK)               │
+ │ provider_id (FK) │                 │ name, slug            │
+ │ user_id (FK)     │                 │ category, food_type   │
+ │ rating (Float)   │                 │ address, locality     │
+ │ review_text      │                 │ latitude, longitude   │
+ │ review_date      │                 │ price_per_month       │
+ │ source           │                 │ review_trust_score    │
+ └────────┬─────────┘                 │ trust_badge           │
+          │ 1                         └───────────┬───────────┘
+          │                                       │ 1
+          │ 1                                     │
+ ┌────────┴─────────┐                             │ 1
+ │ REVIEW_ANALYSIS  │                 ┌───────────┴───────────┐
+ │──────────────────│                 │ PROVIDER_ANALYSIS_SUM │
+ │ id (PK)          │                 │───────────────────────│
+ │ review_id (FK)   │                 │ id (PK)               │
+ │ sentiment        │                 │ provider_id (FK)      │
+ │ is_duplicate     │                 │ positive_pct          │
+ │ flagged_reasons  │                 │ negative_pct          │
+ └──────────────────┘                 │ ai_summary            │
+                                      │ last_analyzed_at      │
+                                      └───────────────────────┘
+      </div>
+      <div class="diagram-caption">Figure 11.1: Tifinify Relational Entity-Relationship (ER) Diagram</div>
+
+      <h3>11.1 Entity Description</h3>
+      <ul>
+        <li><strong>Users:</strong> Stores user identity, authentication hashes, role (user/admin), and profile timestamps.</li>
+        <li><strong>UserPreferences:</strong> 1-to-1 extension of Users storing personal budget, distance, and dietary preferences.</li>
+        <li><strong>Providers:</strong> Master food service entity; contains business name, category (tiffin/mess), coordinates, monthly subscription rate, Trust Score, and trust badge.</li>
+        <li><strong>ProviderSources:</strong> Tracks origin metadata (`web_search`, `gemini_discovery`, `osm_overpass`).</li>
+        <li><strong>Reviews:</strong> Normalized customer reviews with numeric rating (1.0–5.0), author, date, and text.</li>
+        <li><strong>ReviewAnalysis:</strong> 1-to-1 review audit storing sentiment labels, duplicate spam flags, and penalty reasons.</li>
+        <li><strong>ReviewAspects:</strong> Stores aspect-level breakdown (Hygiene, Taste, Quality, Delivery, Price).</li>
+        <li><strong>ProviderAnalysisSummary:</strong> Aggregates positive/negative sentiment shares and Gemini AI summary.</li>
+        <li><strong>Favorites:</strong> Many-to-many relationship linking users to bookmarked providers.</li>
+        <li><strong>Reports & AdminAuditLog:</strong> Audit trails recording user dispute reports and admin interventions.</li>
+      </ul>
+    </div>
+
+    <!-- ==================== 12 & 13. REQUIREMENTS ==================== -->
+    <div class="page-break">
+      <h2>12. FUNCTIONAL REQUIREMENTS</h2>
+      <ul>
+        <li><strong>FR-1 User Authentication:</strong> Secure sign-up, login, logout, and password protection with PBKDF2 salt.</li>
+        <li><strong>FR-2 Geolocation Resolution:</strong> Automatic GPS coordinate detection, IP geolocation fallback, and text geocoding.</li>
+        <li><strong>FR-3 Multi-Radius Filtering:</strong> Filtering provider search results within 1 km, 3 km, 5 km, and 10 km boundaries.</li>
+        <li><strong>FR-4 Live Place Discovery:</strong> Automatic scraping of operating tiffin services via Web Search & Overpass API without paid keys.</li>
+        <li><strong>FR-5 Review Trust Scoring:</strong> Mathematical 0–100 Trust Score generation based on duplicate text and contradiction analysis.</li>
+        <li><strong>FR-6 Multi-Aspect Sentiment:</strong> Sentence-level sentiment extraction across Hygiene, Taste, Delivery, Quality, and Value.</li>
+        <li><strong>FR-7 Grounded AI Summaries:</strong> Objective review summaries synthesized strictly from customer statements via Gemini AI.</li>
+        <li><strong>FR-8 Provider Comparison:</strong> Side-by-side tabular comparison of selected providers.</li>
+        <li><strong>FR-9 Geospatial Map Rendering:</strong> Interactive Leaflet map with category pins, radius overlays, and popups.</li>
+        <li><strong>FR-10 Persistent Dark Theme:</strong> Zero-flicker dark/light mode toggle stored in client localStorage.</li>
+        <li><strong>FR-11 User Bookmarks:</strong> Ability for authenticated users to save favorite providers.</li>
+        <li><strong>FR-12 Admin Telemetry:</strong> Dashboard displaying platform health, flagged reviews, and provider audits.</li>
+      </ul>
+
+      <h2>13. NON-FUNCTIONAL REQUIREMENTS</h2>
+      <ul>
+        <li><strong>NFR-1 Usability:</strong> Responsive, modern interface with responsive touch targets and clean typography.</li>
+        <li><strong>NFR-2 Performance:</strong> Spatial calculations and TF-IDF similarity evaluations complete in under 200 ms.</li>
+        <li><strong>NFR-3 Resilience:</strong> External API failures (Gemini/Google) gracefully trigger local NLP fallback without crashes.</li>
+        <li><strong>NFR-4 Security:</strong> Full protection against SQL Injection (parameterized ORM), XSS, and CSRF attacks.</li>
+        <li><strong>NFR-5 Privacy:</strong> Ephemeral location processing with zero user tracking or coordinate logging.</li>
+        <li><strong>NFR-6 Maintainability:</strong> Clean modular architecture using Flask Blueprints and dedicated service classes.</li>
+        <li><strong>NFR-7 Testability:</strong> Comprehensive pytest suite achieving 100% test pass rate across 22 tests.</li>
+      </ul>
+    </div>
+
+    <!-- ==================== 14, 15, 16. METHODOLOGY & DATABASE ==================== -->
+    <div>
+      <h2>14. METHODOLOGY</h2>
+      <p>
+        Tifinify follows an <strong>Agile, Incremental, and Modular Software Engineering Methodology</strong>:
+      </p>
+      <ul>
+        <li><strong>Requirement Analysis:</strong> User research into hostel meal discovery and fake review tactics.</li>
+        <li><strong>Algorithmic Modeling:</strong> Formulation of MCDA Trust Score weights, TF-IDF cosine thresholds, and aspect lexicons.</li>
+        <li><strong>Data Modeling:</strong> Construction of the relational SQLite database using SQLAlchemy 2.0.</li>
+        <li><strong>Search Intelligence Integration:</strong> Engineering of `WebSearchPlacesAdapter` interfacing with DuckDuckGo and OpenStreetMap Overpass.</li>
+        <li><strong>AI Pipeline Engineering:</strong> Integration of Gemini AI with Google Search grounding and session API key management.</li>
+        <li><strong>Frontend Engineering:</strong> Bootstrap 5 responsive layout, Leaflet maps, and zero-flicker dark theme.</li>
+        <li><strong>Quality Verification:</strong> Automated pytest suite execution (22/22 passing).</li>
+        <li><strong>Cloud Deployment:</strong> Packaging of `Procfile` and `render.yaml` for free cloud hosting.</li>
+      </ul>
+
+      <h2>15. DATABASE DETAILS AND DATA INTEGRITY</h2>
+      <p>
+        Tifinify uses <strong>SQLite 3</strong> through <strong>SQLAlchemy 2.0 ORM</strong>, ensuring zero daemon overhead for local development and total portability to PostgreSQL for production deployments.
+      </p>
+
+      <h3>15.1 Data Integrity and Security</h3>
+      <ul>
+        <li><strong>Foreign Key Cascades:</strong> Deleting a provider cascades deletion to reviews, aspect scores, and sources, preventing orphaned records.</li>
+        <li><strong>Unique Constraints:</strong> Strict indexing on provider slugs and user emails prevents race-condition duplicates.</li>
+        <li><strong>Parameterized Queries:</strong> SQLAlchemy compiles all statements into parameterized SQL, preventing SQL Injection.</li>
+        <li><strong>Salted Password Hashing:</strong> Credentials utilize modern PBKDF2/scrypt cryptographic hashing.</li>
+        <li><strong>Audit Lineage:</strong> Every record retains upstream source metadata (`web_search`, `gemini_discovery`).</li>
+      </ul>
+
+      <h2>16. EXPECTED OUTCOMES</h2>
+      <ul>
+        <li>A fully functional, responsive web application for student and bachelor meal discovery.</li>
+        <li>An operational AI Review Trust Engine distinguishing authentic feedback from promotional spam.</li>
+        <li>Real-world business discovery operating dynamically across cities without paid Google billing.</li>
+        <li>Clear visual separation between raw star ratings and explainable review trust scores.</li>
+        <li>Interactive OpenMaps visualizer with custom category pins and dark theme map tiles.</li>
+        <li>A side-by-side comparison tool for consumer decision support.</li>
+        <li>Complete 1-click cloud deployment readiness on Render.com.</li>
+      </ul>
+    </div>
+
+    <!-- ==================== 17, 18, 19, 20, 21. CONCLUSION ==================== -->
+    <div class="page-break">
+      <h2>17. ADVANTAGES</h2>
+      <ul>
+        <li><strong>Objective Review Verification:</strong> Replaces naive star averages with mathematical trust scoring.</li>
+        <li><strong>Zero Commercial API Costs:</strong> Operates 100% free using OpenStreetMap, DuckDuckGo, and free-tier Gemini AI.</li>
+        <li><strong>Transparent Explainability:</strong> Users can inspect exact positive and warning signals justifying trust badges.</li>
+        <li><strong>Actionable Aspect Breakdown:</strong> Separately scores hygiene, taste, delivery, and pricing.</li>
+        <li><strong>High Fault Tolerance:</strong> Built-in fallback architecture ensures API outages never crash the platform.</li>
+        <li><strong>Student & Bachelor Focused:</strong> Tailored specifically for recurring monthly food subscriptions.</li>
+      </ul>
+
+      <h2>18. LIMITATIONS</h2>
+      <ul>
+        <li><strong>Web Directory Coverage:</strong> Place discovery depends on existing public web listings in newly developing rural sectors.</li>
+        <li><strong>Hardware Geolocation Accuracy:</strong> Precision depends on user device hardware (GPS chip vs. cellular ISP tower IP).</li>
+        <li><strong>Gemini Free-Tier Rate Limits:</strong> High concurrent burst queries may encounter temporary rate limits if a personal key is omitted.</li>
+        <li><strong>Language Focus:</strong> Current NLP aspect extractors are optimized for English and transliterated Hindi/Hinglish terms.</li>
+      </ul>
+
+      <h2>19. FUTURE SCOPE</h2>
+      <ul>
+        <li><strong>Direct Online Subscriptions:</strong> Integrate UPI and Razorpay payment gateways for monthly meal booking.</li>
+        <li><strong>Daily Menu Publishing:</strong> Provide vendor portals for mess owners to publish daily lunch and dinner menus.</li>
+        <li><strong>Multilingual NLP:</strong> Expand aspect extraction and sentiment analysis to regional Indian languages (Hindi, Marathi, Bengali).</li>
+        <li><strong>Native Mobile Apps:</strong> Package the responsive system into native Android/iOS apps using Flutter.</li>
+        <li><strong>FSSAI Hygiene Badging:</strong> Partner with local food safety authorities to display verified hygiene certifications.</li>
+      </ul>
+
+      <h2>20. CONCLUSION</h2>
+      <p>
+        <strong>Tifinify</strong> demonstrates how modern computer science disciplines—combining full-stack web engineering, natural language processing, machine learning heuristics, spatial computing, and generative artificial intelligence—can be synthesized into an impactful, consumer-centric software product.
+      </p>
+      <p>
+        The central achievement of the project is its <strong>Explainable Review Intelligence Architecture</strong>. By decoupling raw star ratings from mathematical Review Trust Scores, Tifinify equips students, bachelors, and working professionals with the transparency needed to protect their health and finances.
+      </p>
+      <p>
+        Furthermore, the project’s zero-billing search design, resilient fallback architecture, responsive dark/light UI, and 100% automated test coverage establish Tifinify as a complete, robust, and industry-grade software engineering project suitable for the Master of Computer Application degree.
+      </p>
+
+      <h2>21. REFERENCES</h2>
+      <ol>
+        <li><strong>Tifinify GitHub Repository:</strong> <a href="https://github.com/pranab1411/tifinify" target="_blank">https://github.com/pranab1411/tifinify</a></li>
+        <li><strong>Flask Documentation:</strong> Pallets Projects — <em>Flask Web Development Documentation (v3.0.x)</em>, <a href="https://flask.palletsprojects.com/" target="_blank">https://flask.palletsprojects.com/</a></li>
+        <li><strong>Google Gemini API Documentation:</strong> Google AI for Developers — <em>Gemini API Reference and Python SDK (`google-genai`)</em>, <a href="https://ai.google.dev/" target="_blank">https://ai.google.dev/</a></li>
+        <li><strong>Scikit-Learn Documentation:</strong> Pedregosa et al. — <em>Machine Learning in Python (TF-IDF & Cosine Similarity)</em>, <a href="https://scikit-learn.org/" target="_blank">https://scikit-learn.org/</a></li>
+        <li><strong>SQLAlchemy Documentation:</strong> Michael Bayer — <em>SQLAlchemy 2.0 Unified Documentation</em>, <a href="https://www.sqlalchemy.org/" target="_blank">https://www.sqlalchemy.org/</a></li>
+        <li><strong>Leaflet.js Documentation:</strong> Vladimir Agafonkin — <em>Leaflet: An Open-Source JavaScript Library for Mobile-Friendly Interactive Maps</em>, <a href="https://leafletjs.com/" target="_blank">https://leafletjs.com/</a></li>
+        <li><strong>OpenStreetMap & Overpass API:</strong> OpenStreetMap Foundation — <em>Overpass API Documentation & Query Guide</em>, <a href="https://wiki.openstreetmap.org/wiki/Overpass_API" target="_blank">https://wiki.openstreetmap.org/wiki/Overpass_API</a></li>
+        <li><strong>Bootstrap Documentation:</strong> The Bootstrap Authors — <em>Bootstrap v5.3 Framework & Color Modes Guide</em>, <a href="https://getbootstrap.com/" target="_blank">https://getbootstrap.com/</a></li>
+        <li><strong>Jindal, N., & Liu, B. (2008):</strong> <em>Opinion Spam and Analysis</em>. Proceedings of the 2008 International Conference on Web Search and Data Mining (WSDM '08), ACM.</li>
+        <li><strong>Python Software Foundation:</strong> <em>Python 3.11/3.12/3.14 Standard Library and Language Reference</em>, <a href="https://docs.python.org/3/" target="_blank">https://docs.python.org/3/</a></li>
+      </ol>
+    </div>
+
+  </div>
+
+</body>
+</html>
