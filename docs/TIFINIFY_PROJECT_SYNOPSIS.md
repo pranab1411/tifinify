@@ -9,13 +9,12 @@
 ---
 
 **Submitted by:**  
-**Pranab Chourasiya** (0201CA251047)  
-**Chandrashekhar Suryawanshi** (0201CA251018)  
+**Shreya Jhariya** (0201CA2510)  
+**Ayushi Kukrele** (0201CA2510)  
 III SEM. MCA  
 
 **Submitted to:**  
 **Dr. SAMAR UPADHYAY**  
-**Dr. MAMTA LAMBERT**  
 *Head of Department (HOD)*  
 
 **Under the Guidance of:**  
