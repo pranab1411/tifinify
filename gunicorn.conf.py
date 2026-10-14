@@ -5,8 +5,8 @@ port = os.environ.get("PORT", "5000")
 bind = f"0.0.0.0:{port}"
 
 # Optimize workers and threads for Render free tier (512MB RAM)
-workers = int(os.environ.get("WEB_CONCURRENCY", "2"))
-threads = 4
+workers = int(os.environ.get("WEB_CONCURRENCY", "1"))
+threads = 2
 timeout = 120
 keepalive = 5
 
