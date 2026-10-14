@@ -116,10 +116,11 @@ class GeminiPlacesAdapter(BaseProviderSource):
                     f'}}'
                 )
 
+                model_name = os.environ.get("GEMINI_MODEL", "gemini-3.8-flash")
                 # Use Google Search tool grounding if supported by model
                 try:
                     response = self.client.models.generate_content(
-                        model="gemini-2.5-flash",
+                        model=model_name,
                         contents=prompt,
                         config=types.GenerateContentConfig(
                             tools=[types.Tool(google_search=types.GoogleSearch())],
@@ -128,7 +129,7 @@ class GeminiPlacesAdapter(BaseProviderSource):
                 except Exception as tool_err:
                     logger.info(f"Google Search tool grounding fallback to standard prompt: {tool_err}")
                     response = self.client.models.generate_content(
-                        model="gemini-2.5-flash",
+                        model=model_name,
                         contents=prompt,
                     )
 

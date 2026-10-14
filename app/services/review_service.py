@@ -86,7 +86,7 @@ class ReviewService:
             analysis_record.analyzed_at = datetime.utcnow()
 
             # Clear old aspects and insert newly extracted
-            ReviewAspect.query.filter_by(review_id=r.id).delete()
+            ReviewAspect.query.filter_by(review_id=r.id).delete(synchronize_session=False)
             for asp in rev_res.get("aspects", []):
                 aspect_row = ReviewAspect(
                     review_id=r.id,

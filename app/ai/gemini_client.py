@@ -55,10 +55,17 @@ class GeminiAnalysisClient:
                     f"4. If reviews are mixed or conflicting, state this clearly.\n"
                 )
 
-                response = self.client.models.generate_content(
-                    model="gemini-2.5-flash",
-                    contents=prompt,
-                )
+                model_name = os.environ.get("GEMINI_MODEL", "gemini-3.8-flash")
+                try:
+                    response = self.client.models.generate_content(
+                        model=model_name,
+                        contents=prompt,
+                    )
+                except Exception:
+                    response = self.client.models.generate_content(
+                        model="gemini-2.5-flash",
+                        contents=prompt,
+                    )
                 if response and response.text:
                     return response.text.strip()
             except Exception as e:
