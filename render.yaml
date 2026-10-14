@@ -1,6 +1,6 @@
 services:
   - type: web
-    name: tifinify-project-2026
+    name: tifinify-live-2026
     runtime: python
     region: oregon
     plan: free
