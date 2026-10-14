@@ -1,6 +1,6 @@
 services:
   - type: web
-    name: tifinify-live-2026
+    name: tifinify-app
     runtime: python
     region: singapore
     plan: free
