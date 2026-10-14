@@ -23,3 +23,10 @@ def index():
 def about():
     """About Page: Project objectives, AI review intelligence principles, and disclaimer."""
     return render_template("main/about.html")
+
+
+@main_bp.route("/healthz")
+@main_bp.route("/health")
+def healthz():
+    """Lightweight health check endpoint for Render proxy."""
+    return "OK", 200
