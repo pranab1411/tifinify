@@ -1,3 +1,4 @@
+# Tifinify Production Entrypoint for Render WSGI
 import os
 from app import create_app
 
