@@ -5,13 +5,19 @@ services:
     region: singapore
     plan: free
     branch: main
-    buildCommand: pip install -r requirements.txt
+    buildCommand: pip install -r requirements.txt && python scripts/seed_db.py
     startCommand: gunicorn run:app
     autoDeploy: true
     envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.9
       - key: FLASK_ENV
         value: production
+      - key: DEMO_MODE
+        value: "True"
       - key: SECRET_KEY
         generateValue: true
       - key: GEMINI_API_KEY
+        sync: false
+      - key: GOOGLE_MAPS_API_KEY
         sync: false

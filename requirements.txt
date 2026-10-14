@@ -6,6 +6,7 @@ flask-wtf>=1.2.1
 email-validator>=2.1.0
 werkzeug>=3.0.1
 python-dotenv>=1.0.1
+psycopg2-binary>=2.9.9; sys_platform != "win32"
 
 # AI & NLP / Mathematical Computation
 google-genai>=0.1.1
@@ -16,7 +17,8 @@ numpy>=1.26.0
 requests>=2.31.0
 
 # Production WSGI Server
-gunicorn>=21.2.0
+gunicorn>=21.2.0; sys_platform != "win32"
+waitress>=3.0.0; sys_platform == "win32"
 
 # Testing
 pytest>=8.0.0

@@ -15,7 +15,10 @@ class Config:
     
     # Database
     db_path = BASE_DIR / "instance" / "tifinify.db"
-    SQLALCHEMY_DATABASE_URI = os.environ.get("DATABASE_URL", f"sqlite:///{db_path}")
+    raw_db_url = os.environ.get("DATABASE_URL")
+    if raw_db_url and raw_db_url.startswith("postgres://"):
+        raw_db_url = raw_db_url.replace("postgres://", "postgresql://", 1)
+    SQLALCHEMY_DATABASE_URI = raw_db_url or f"sqlite:///{db_path}"
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     
     # External APIs

@@ -14,7 +14,7 @@
 III SEM. MCA  
 
 **Submitted to:**  
-**Dr. SAMAR UPADHYAY**  
+**Dr. SAMAR UPADHYAY**   
 *Head of Department (HOD)*  
 
 **Under the Guidance of:**  
@@ -612,13 +612,13 @@ Furthermore, the project’s zero-billing search design, resilient fallback arch
 
 ## 21. REFERENCES
 
-1. **Flask Documentation**: Pallets Projects — *Flask Web Development Documentation* (v3.0.x), [https://flask.palletsprojects.com/](https://flask.palletsprojects.com/)
-2. **Google Gemini API Documentation**: Google AI for Developers — *Gemini API Reference and Python SDK (`google-genai`)*, [https://ai.google.dev/](https://ai.google.dev/)
-3. **Scikit-Learn Documentation**: Pedregosa et al. — *Machine Learning in Python (TF-IDF & Cosine Similarity)*, [https://scikit-learn.org/](https://scikit-learn.org/)
-4. **SQLAlchemy Documentation**: Michael Bayer — *SQLAlchemy 2.0 Unified Documentation*, [https://www.sqlalchemy.org/](https://www.sqlalchemy.org/)
-5. **Leaflet.js Documentation**: Vladimir Agafonkin — *Leaflet: An Open-Source JavaScript Library for Mobile-Friendly Interactive Maps*, [https://leafletjs.com/](https://leafletjs.com/)
-6. **OpenStreetMap & Overpass API**: OpenStreetMap Foundation — *Overpass API Documentation & Query Guide*, [https://wiki.openstreetmap.org/wiki/Overpass_API](https://wiki.openstreetmap.org/wiki/Overpass_API)
-7. **Bootstrap Documentation**: The Bootstrap Authors — *Bootstrap v5.3 Framework & Color Modes Guide*, [https://getbootstrap.com/](https://getbootstrap.com/)
-8. **Jindal, N., & Liu, B.** (2008). *Opinion Spam and Analysis*. Proceedings of the 2008 International Conference on Web Search and Data Mining (WSDM '08), ACM.
-9. **Manning, C. D., Raghavan, P., & Schütze, H.** (2008). *Introduction to Information Retrieval* (Vector Space Model & Scoring). Cambridge University Press.
+1. **Tifinify GitHub Repository**: [https://github.com/pranab1411/tifinify](https://github.com/pranab1411/tifinify)
+2. **Flask Documentation**: Pallets Projects — *Flask Web Development Documentation* (v3.0.x), [https://flask.palletsprojects.com/](https://flask.palletsprojects.com/)
+3. **Google Gemini API Documentation**: Google AI for Developers — *Gemini API Reference and Python SDK (`google-genai`)*, [https://ai.google.dev/](https://ai.google.dev/)
+4. **Scikit-Learn Documentation**: Pedregosa et al. — *Machine Learning in Python (TF-IDF & Cosine Similarity)*, [https://scikit-learn.org/](https://scikit-learn.org/)
+5. **SQLAlchemy Documentation**: Michael Bayer — *SQLAlchemy 2.0 Unified Documentation*, [https://www.sqlalchemy.org/](https://www.sqlalchemy.org/)
+6. **Leaflet.js Documentation**: Vladimir Agafonkin — *Leaflet: An Open-Source JavaScript Library for Mobile-Friendly Interactive Maps*, [https://leafletjs.com/](https://leafletjs.com/)
+7. **OpenStreetMap & Overpass API**: OpenStreetMap Foundation — *Overpass API Documentation & Query Guide*, [https://wiki.openstreetmap.org/wiki/Overpass_API](https://wiki.openstreetmap.org/wiki/Overpass_API)
+8. **Bootstrap Documentation**: The Bootstrap Authors — *Bootstrap v5.3 Framework & Color Modes Guide*, [https://getbootstrap.com/](https://getbootstrap.com/)
+9. **Jindal, N., & Liu, B.** (2008). *Opinion Spam and Analysis*. Proceedings of the 2008 International Conference on Web Search and Data Mining (WSDM '08), ACM.
 10. **Python Software Foundation**: *Python 3.11/3.12/3.14 Standard Library and Language Reference*, [https://docs.python.org/3/](https://docs.python.org/3/)
